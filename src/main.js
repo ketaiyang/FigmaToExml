@@ -1,6 +1,6 @@
-import './global.css';
+import './ui/global.css';
 
-import App from './App.svelte';
+import App from './ui/Main.svelte';
 
 const app = new App({
 	target: document.body,
