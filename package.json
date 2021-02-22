@@ -3,10 +3,25 @@
   "version": "1.0.0",
   "devDependencies": {
     "@figma/plugin-typings": "^1.19.1",
+    "@fullhuman/postcss-purgecss": "^2.3.0",
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-image": "^2.0.4",
+    "@rollup/plugin-node-resolve": "^10.0.0",
+    "@rollup/plugin-typescript": "^6.1.0",
     "clipboard-copy": "^4.0.1",
     "css-loader": "^3.2.0",
+    "cssnano": "^4.1.10",
     "html-webpack-inline-source-plugin": "^0.0.10",
     "html-webpack-plugin": "^3.2.0",
+    "postcss-loader": "^5.0.0",
+    "rollup": "^2.38.0",
+    "rollup-plugin-html-bundle": "0.0.3",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-postcss": "^2.5.0",
+    "rollup-plugin-purgecss": "^1.0.0",
+    "rollup-plugin-svelte": "^7.1.0",
+    "rollup-plugin-svg": "^2.0.0",
+    "rollup-plugin-terser": "^7.0.2",
     "style-loader": "^1.0.0",
     "svelte": "^3.9.1",
     "svelte-loader": "^2.13.6",
@@ -16,11 +31,18 @@
     "webpack-cli": "^3.3.7"
   },
   "description": "Your Figma plugin",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "build": "webpack --production",
-    "watch": "webpack -w"
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "start": "sirv dist"
   },
   "author": "",
-  "license": ""
+  "license": "",
+  "dependencies": {
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.35",
+    "sirv-cli": "^1.0.11",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.0.3"
+  }
 }
