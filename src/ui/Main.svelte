@@ -23,7 +23,7 @@
 	//use bind:group, with a var to create a radio group and store the value of selected item
 	//set value if this var to same value as radio item to set initial selection
 	// var switchValue;
-	// import ScreenTailwind from "./ScreenTailwind.svelte";
+	import ScreenExml from "./ScreenExml.svelte";
 	// import ScreenFlutter from "./ScreenFlutter.svelte";
 	// import ScreenSwiftUI from "./ScreenSwiftUI.svelte";
 	// import ScreenHTML from "./ScreenHtml.svelte";
@@ -42,14 +42,14 @@
   
 	<TabList>
 	  <Tab>Exml</Tab>
-	  <Tab>Flutter</Tab>
+	  <!-- <Tab>Flutter</Tab>
 	  <Tab>SwiftUI</Tab>
 	  <Tab>HTML</Tab>
-	  <Tab>About</Tab>
+	  <Tab>About</Tab> -->
 	</TabList>
   
 	<TabPanel>
-	  <!-- <ScreenTailwind on:clipboard={updateClipboard} /> -->
+	  <ScreenExml on:clipboard={updateClipboard} />
 	</TabPanel>
   
 	<TabPanel>
