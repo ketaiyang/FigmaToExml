@@ -7,11 +7,12 @@
 // import { swiftuiMain } from "./swiftui/swiftuiMain";
 // import { tailwindMain } from "./tailwind/tailwindMain";
 // import { flutterMain } from "./flutter/flutterMain";
-// import { convertIntoAltNodes } from "./altNodes/altConversion";
+import { convertIntoAltNodes } from "./altNodes/altConversion";
+import {exmlMain} from "./exml/exmlMain"
 
-// let parentId: string;
-// let isJsx = false;
-// let layerName = false;
+let parentId: string;
+let isJsx = false;
+let layerName = false;
 // let material = true;
 
 let mode: "exml";
@@ -20,7 +21,7 @@ figma.showUI(__html__, { width: 450, height: 550 });
 
 const run = () => {
   // ignore when nothing was selected
-  if (figma.currentPage.selection.length === 0) {
+  if (figma.currentPage.selection.length === 0 || figma.currentPage.selection[0].type != "FRAME") {
     figma.ui.postMessage({
       type: "empty",
     });
@@ -28,27 +29,42 @@ const run = () => {
   }
 
   // check [ignoreStackParent] description
-//   if (figma.currentPage.selection.length > 0) {
-//     parentId = figma.currentPage.selection[0].parent?.id ?? "";
-//   }
+  if (figma.currentPage.selection.length > 0) {
+    parentId = figma.currentPage.selection[0].parent?.id ?? "";
+  }
 
-  let result = "<div style=\"width: 1186px; height: 901px; background-color: white; position: relative;\"></div>";
+  let result = "";
 
-//   const convertedSelection = convertIntoAltNodes(
-//     figma.currentPage.selection,
-//     null
-//   );
+  const convertedSelection = convertIntoAltNodes(
+    figma.currentPage.selection,
+    null
+  );
+
+  console.log('length:'+figma.currentPage.selection.length)
+  if (figma.currentPage.selection[0].type == "FRAME"){
+    console.log(figma.currentPage.selection[0].children.length)
+  }
+  const currentSelection = figma.currentPage.selection[0]
+  // const nodes = currentSelection.findAll(node => node.visible != false)
+  nodes = Array<SceneNode>()
+  traverse(currentSelection)
+  // for(const node of nodes){
+  //   console.log(node.name)
+  // }
 
   // @ts-ignore
-//   if (mode === "flutter") {
-//     result = flutterMain(convertedSelection, parentId, material);
-//   } else if (mode === "tailwind") {
-//     result = tailwindMain(convertedSelection, parentId, isJsx, layerName);
-//   } else if (mode === "swiftui") {
-//     result = swiftuiMain(convertedSelection, parentId);
-//   } else if (mode === "html") {
-//     result = htmlMain(convertedSelection, parentId, isJsx, layerName);
-//   }
+  // if (mode === "flutter") {
+  //   result = flutterMain(convertedSelection, parentId, material);
+  // } else if (mode === "tailwind") {
+  //   result = tailwindMain(convertedSelection, parentId, isJsx, layerName);
+  // } else if (mode === "swiftui") {
+  //   result = swiftuiMain(convertedSelection, parentId);
+  // } else if (mode === "html") {
+  //   result = htmlMain(convertedSelection, parentId, isJsx, layerName);
+  // }
+  if (mode == "exml"){
+    result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
+  }
 
 //   console.log(result);
 
@@ -104,3 +120,16 @@ figma.ui.onmessage = (msg) => {
 //     run();
 //   }
 };
+
+
+let nodes = Array<SceneNode>()
+function traverse(node){
+  if (node.visible != false) {
+    nodes.push(node)
+    if ("children" in node) {
+      for (const child of node.children) {
+        traverse(child)
+      }
+    }
+  }
+}
