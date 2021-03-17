@@ -8,7 +8,7 @@ type SizeResult = {
 };
 
 export const nodeWidthHeight = (
-  node: AltSceneNode,
+  node: SceneNode,
   allowRelative: boolean
 ): SizeResult => {
   /// WIDTH AND HEIGHT
@@ -162,7 +162,7 @@ export const nodeWidthHeight = (
 };
 
 // makes the view size bigger when there is a stroke
-const getNodeSizeWithStrokes = (node: AltSceneNode): Array<number> => {
+const getNodeSizeWithStrokes = (node: SceneNode): Array<number> => {
   let nodeHeight = node.height;
   let nodeWidth = node.width;
 

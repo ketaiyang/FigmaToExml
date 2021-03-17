@@ -8,20 +8,21 @@
 // import { tailwindMain } from "./tailwind/tailwindMain";
 // import { flutterMain } from "./flutter/flutterMain";
 import { convertIntoAltNodes } from "./altNodes/altConversion";
-import {exmlMain} from "./exml/exmlMain"
+import { exmlMain, parse } from "./exml/exmlMain"
+import { parse as exmlParse } from "./exml/builderImpl/exmlComponent";
 
 let parentId: string;
 let isJsx = false;
 let layerName = false;
 // let material = true;
 
-let mode: "exml";
+let mode: "exml" | "property";
 
 figma.showUI(__html__, { width: 450, height: 550 });
 
 const run = () => {
   // ignore when nothing was selected
-  if (figma.currentPage.selection.length === 0 || figma.currentPage.selection[0].type != "FRAME") {
+  if (figma.currentPage.selection.length === 0 || figma.currentPage.selection.length > 1) {
     figma.ui.postMessage({
       type: "empty",
     });
@@ -63,15 +64,23 @@ const run = () => {
   //   result = htmlMain(convertedSelection, parentId, isJsx, layerName);
   // }
   if (mode == "exml"){
-    result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
+    if (currentSelection.type == "FRAME" || currentSelection.type == "GROUP"){
+      result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
+
+      figma.ui.postMessage({
+        type: "result",
+        data: result,
+      });
+    }
+  }else if (mode == "property"){
+    figma.ui.postMessage({
+      type: "result",
+      data: exmlParse(currentSelection),
+    });
   }
 
 //   console.log(result);
 
-  figma.ui.postMessage({
-    type: "result",
-    data: result,
-  });
 
 //   if (
 //     mode === "tailwind" ||
@@ -105,6 +114,10 @@ figma.on("selectionchange", () => {
 // todo pass data instead of relying in types
 figma.ui.onmessage = (msg) => {
   if (msg.type === "exml") 
+  {
+    mode = msg.type;
+    run();
+  }else if (msg.type === "property") 
   {
     mode = msg.type;
     run();

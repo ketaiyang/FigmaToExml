@@ -1,44 +1,43 @@
-import { formatWithJSX } from "../../common/parseJSX";
+import { format } from "../../common/parse";
 import { AltSceneNode } from "../../altNodes/altMixins";
 import { nodeWidthHeight } from "../../common/nodeWidthHeight";
 
-export const exmlSize = (node: AltSceneNode, isJSX: boolean): string => {
-  return exmlSizePartial(node, isJSX).join("");
+export const exmlSize = (node: SceneNode): string => {
+  return exmlSizePartial(node).join("");
 };
 
 export const exmlSizePartial = (
-  node: AltSceneNode,
-  isJsx: boolean
+  node: SceneNode,
 ): [string, string] => {
   const size = nodeWidthHeight(node, false);
 
   let w = "";
   if (typeof size.width === "number") {
-    w += formatWithJSX("width", isJsx, size.width);
+    w += format("width", size.width);
   } else if (size.width === "full") {
     if (
       node.parent &&
       "layoutMode" in node.parent &&
       node.parent.layoutMode === "HORIZONTAL"
     ) {
-      w += formatWithJSX("flex", isJsx, "1 1 0%");
+      w += format("flex", "1 1 0%");
     } else {
-      w += formatWithJSX("width", isJsx, "100%");
+      w += format("width", "100%");
     }
   }
 
   let h = "";
   if (typeof size.height === "number") {
-    h += formatWithJSX("height", isJsx, size.height);
+    h += format("height", size.height);
   } else if (typeof size.height === "string") {
     if (
       node.parent &&
       "layoutMode" in node.parent &&
       node.parent.layoutMode === "VERTICAL"
     ) {
-      h += formatWithJSX("flex", isJsx, "1 1 0%");
+      h += format("flex", "1 1 0%");
     } else {
-      h += formatWithJSX("height", isJsx, "100%");
+      h += format("height", "100%");
     }
   }
 

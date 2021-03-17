@@ -1,7 +1,7 @@
 import { AltBlendMixin } from "../../altNodes/altMixins";
 import { AltLayoutMixin, AltSceneNode } from "../../altNodes/altMixins";
 import { numToAutoFixed } from "../../common/numToAutoFixed";
-import { formatWithJSX } from "../../common/parseJSX";
+import { format } from "../../common/parse";
 
 /**
  * https://tailwindcss.com/docs/opacity/
@@ -33,7 +33,7 @@ export const exmlVisibility = (node: AltSceneNode, isJsx: boolean): string => {
   // Therefore, instead of changing the visibility (which causes bugs in nested divs),
   // this plugin is going to ignore color and stroke
   if (node.visible !== undefined && !node.visible) {
-    return formatWithJSX("visibility", isJsx, "hidden");
+    return format("visibility", isJsx, "hidden");
   }
   return "";
 };
@@ -47,7 +47,7 @@ export const exmlRotation = (node: AltLayoutMixin, isJsx: boolean): string => {
   // that's how you convert angles to clockwise radians: angle * -pi/180
   // using 3.14159 as Pi for enough precision and to avoid importing math lib.
   if (node.rotation !== undefined && Math.round(node.rotation) !== 0) {
-    return formatWithJSX(
+    return format(
       "transform",
       isJsx,
       `rotate(${numToAutoFixed(node.rotation)}deg)`

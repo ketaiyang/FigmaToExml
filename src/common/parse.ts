@@ -1,8 +1,7 @@
 import { numToAutoFixed } from "./numToAutoFixed";
 
-export const formatWithJSX = (
+export const format = (
   property: string,
-  isJsx: boolean,
   value: number | string
 ): string => {
   // convert font-size to fontSize.
@@ -12,16 +11,8 @@ export const formatWithJSX = (
     .join("");
 
   if (typeof value === "number") {
-    if (isJsx) {
-      return `${jsx_property}: ${numToAutoFixed(value)}, `;
-    } else {
-      return `${property}: ${numToAutoFixed(value)}px; `;
-    }
+    return `${property}="${numToAutoFixed(value)}" `;
   } else {
-    if (isJsx) {
-      return `${jsx_property}: '${value}', `;
-    } else {
-      return `${property}: ${value}; `;
-    }
+    return `${property}="${value}" `;
   }
 };

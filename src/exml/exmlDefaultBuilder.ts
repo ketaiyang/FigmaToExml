@@ -17,7 +17,7 @@ import {
   exmlGradientFromFills,
 } from "./builderImpl/exmlColor";
 import { exmlPadding } from "./builderImpl/exmlPadding";
-import { formatWithJSX } from "../common/parseJSX";
+import { format } from "../common/parse";
 import { parentCoordinates } from "../common/parentCoordinates";
 import { exmlSize, exmlSizePartial } from "./builderImpl/exmlSize";
 import { exmlBorderRadius } from "./builderImpl/exmlBorderRadius";
@@ -29,7 +29,7 @@ export class ExmlDefaultBuilder {
   name: string = "";
   hasFixedSize = false;
 
-  constructor(node: AltSceneNode, showLayerName: boolean, optIsJSX: boolean) {
+  constructor(node: SceneNode) {
     this.isJSX = optIsJSX;
     this.style = "";
     this.visible = node.visible;
@@ -70,11 +70,11 @@ export class ExmlDefaultBuilder {
       const weight = node.strokeWeight;
 
       if (fill.kind === "gradient") {
-        this.style += formatWithJSX("border", this.isJSX, `${weight}px solid`);
+        this.style += format("border", this.isJSX, `${weight}px solid`);
 
         // Gradient requires these.
-        this.style += formatWithJSX("border-image-slice", this.isJSX, 1);
-        this.style += formatWithJSX(
+        this.style += format("border-image-slice", this.isJSX, 1);
+        this.style += format(
           "border-image-source",
           this.isJSX,
           fill.prop
@@ -84,7 +84,7 @@ export class ExmlDefaultBuilder {
 
         // use "2px solid white" instead of splitting into three properties.
         // This pattern seems more common than using border, borderColor and borderWidth.
-        this.style += formatWithJSX("border", this.isJSX, border);
+        this.style += format("border", this.isJSX, border);
       }
     }
 
@@ -102,10 +102,10 @@ export class ExmlDefaultBuilder {
       const left = node.x - parentX;
       const top = node.y - parentY;
 
-      this.style += formatWithJSX("left", this.isJSX, left);
-      this.style += formatWithJSX("top", this.isJSX, top);
+      this.style += format("left", this.isJSX, left);
+      this.style += format("top", this.isJSX, top);
 
-      this.style += formatWithJSX("position", this.isJSX, "absolute");
+      this.style += format("position", this.isJSX, "absolute");
     } else {
       this.style += position;
     }
@@ -122,20 +122,20 @@ export class ExmlDefaultBuilder {
       // When text, solid must be outputted as 'color'.
       const prop = property === "text" ? "color" : property;
 
-      this.style += formatWithJSX(prop, this.isJSX, fill.prop);
+      this.style += format(prop, this.isJSX, fill.prop);
     } else if (fill.kind === "gradient") {
       if (property === "background-color") {
-        this.style += formatWithJSX("background-image", this.isJSX, fill.prop);
+        this.style += format("background-image", this.isJSX, fill.prop);
       } else if (property === "text") {
-        this.style += formatWithJSX("background", this.isJSX, fill.prop);
+        this.style += format("background", this.isJSX, fill.prop);
 
-        this.style += formatWithJSX(
+        this.style += format(
           "-webkit-background-clip",
           this.isJSX,
           "text"
         );
 
-        this.style += formatWithJSX(
+        this.style += format(
           "-webkit-text-fill-color",
           this.isJSX,
           "transparent"
@@ -167,7 +167,7 @@ export class ExmlDefaultBuilder {
   shadow(node: AltBlendMixin): this {
     const shadow = exmlShadow(node);
     if (shadow) {
-      this.style += formatWithJSX("box-shadow", this.isJSX, exmlShadow(node));
+      this.style += format("box-shadow", this.isJSX, exmlShadow(node));
     }
     return this;
   }

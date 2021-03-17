@@ -1,8 +1,8 @@
 import { AltTextNode } from "../../altNodes/altMixins";
 import { exmlSizePartial } from "./exmlSize";
 
-export const exmlTextSize = (node: AltTextNode, isJsx: boolean): string => {
-  const [width, height] = exmlSizePartial(node, isJsx);
+export const exmlTextSize = (node: TextNode): string => {
+  const [width, height] = exmlSizePartial(node);
 
   let comp = "";
   if (node.textAutoResize !== "WIDTH_AND_HEIGHT") {

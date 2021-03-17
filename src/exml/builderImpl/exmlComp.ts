@@ -1,24 +1,14 @@
-export const parse = (
-    node: SceneNode,
-) : Array<[string, string]> => {
+// export const parse = (
+//     node: SceneNode,
+// ) => {
+//     let name = node.getPluginData("name")
+//     console.log(node.name+name)
+// };
 
-    let arr : Array<[string, string]>
-    let name = node.getPluginData("name")
-    console.log("name"+node.name+name)
-
-    if (name in components){
-        let comp = components[name]
-        arr.push(["name", name])
-
-        comp.property.forEach(key => {
-            let value = node.getPluginData(key)
-            arr.push([key, value])
-        });
-    }
-
-    return arr
-};
-
+// let properties = {
+//     id: ["id","string"],
+//     skinname:["skinName", "string"],
+// };
 export const component =["btn","fp"];
 export const components = {
     //Button

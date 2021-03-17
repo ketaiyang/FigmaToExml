@@ -8,9 +8,9 @@ import {
 } from "../altNodes/altMixins";
 import { ExmlTextBuilder } from "./exmlTextBuilder";
 import { ExmlDefaultBuilder as ExmlDefaultBuilder } from "./exmlDefaultBuilder";
-import { formatWithJSX } from "../common/parseJSX";
+import { format } from "../common/parse";
 import { indentString } from "../common/indentString";
-import { components } from "../exml/builderImpl/exmlComponent";
+import { components } from "./builderImpl/exmlComp";
 
 let parentId = "";
 
@@ -47,31 +47,51 @@ const exmlWidgetGenerator = (
   let comp = "";
   
   // filter non visible nodes. This is necessary at this step because conversion already happened.
-  const visibleSceneNode = sceneNode.filter((d) => d.visible !== false);
+  // const visibleSceneNode = sceneNode.filter((d) => d.visible !== false);
 
-  const sceneLen = visibleSceneNode.length;
+  // const sceneLen = visibleSceneNode.length;
 
-  visibleSceneNode.forEach((node, index) => {
-    console.log(components[node.name])
-    if (node.type === "RECTANGLE" || node.type === "ELLIPSE") {
-      comp += exmlContainer(node, "", "", isJsx);
-    } else if (node.type === "GROUP") {
-      comp += exmlGroup(node, isJsx);
-    } else if (node.type === "FRAME") {
-      comp += exmlFrame(node, isJsx);
-    } else if (node.type === "TEXT") {
-      comp += exmlText(node, false, isJsx);
-    }
+  // visibleSceneNode.forEach((node, index) => {
+  //   console.log(components[node.name])
+  //   if (node.type === "RECTANGLE" || node.type === "ELLIPSE") {
+  //     comp += exmlContainer(node, "", "", isJsx);
+  //   } else if (node.type === "GROUP") {
+  //     comp += exmlGroup(node, isJsx);
+  //   } else if (node.type === "FRAME") {
+  //     comp += exmlFrame(node, isJsx);
+  //   } else if (node.type === "TEXT") {
+  //     comp += exmlText(node, false, isJsx);
+  //   }
 
-    comp += addSpacingIfNeeded(node, index, sceneLen, isJsx);
+  //   comp += addSpacingIfNeeded(node, index, sceneLen, isJsx);
 
-    // todo support Line
-  });
-
-  // const visibleNode = nodes.filter((d) => d.visible != false && !d.name.trimStart().startsWith("ignore"))
-  // visibleNode.forEach((node, index) => {
-
+  //   // todo support Line
   // });
+  components.btn.property.forEach(element => {
+    console.log("1111111111111111"+(typeof element))
+  });
+  // console.log("1111111111111111"+components.btn.property)
+
+  const visibleNode = nodes.filter((d) => d.visible != false && !d.name.trimStart().startsWith("ignore"))
+  visibleNode.forEach((node, index) => {
+    if (node.type === "TEXT"){
+      if (node.fontName !== figma.mixed){
+        console.log(node.fontName.style)
+        console.log(node.constraints.horizontal)
+        console.log(node.getPluginData("id"))
+        // node.setPluginData("id","256")
+      }
+      // comp += exmlText(node);
+    }
+    console.log(node.name+node.type+("constraints" in node))
+    // console.log(node.name+node.constraints.horizontal)
+    if ("constraints" in node) {
+      // if(node.parent.type === "COMPONENT"){
+      //   node.parent.width
+      // }
+      console.log(node.name+node.constraints.horizontal)
+    }
+  });
 
   return comp;
 };
@@ -95,7 +115,7 @@ const exmlGroup = (node: AltGroupNode, isJsx: boolean = false): string => {
     .position(node, parentId);
 
   if (builder.style) {
-    const attr = builder.build(formatWithJSX("position", isJsx, "relative"));
+    const attr = builder.build(format("position", isJsx, "relative"));
 
     const generator = exmlWidgetGenerator(node.children, isJsx);
 
@@ -106,9 +126,8 @@ const exmlGroup = (node: AltGroupNode, isJsx: boolean = false): string => {
 };
 
 const exmlText = (
-  node: AltTextNode,
+  node: TextNode,
   isInput: boolean = false,
-  isJsx: boolean
 ): string | [string, string] => {
   // follow the website order, to make it easier
 
@@ -166,7 +185,7 @@ const exmlFrame = (node: AltFrameNode, isJsx: boolean = false): string => {
     return exmlContainer(
       node,
       childrenStr,
-      formatWithJSX("position", isJsx, "relative"),
+      format("position", isJsx, "relative"),
       isJsx
     );
   }
@@ -231,8 +250,8 @@ export const rowColumnProps = (node: AltFrameNode, isJsx: boolean): string => {
   // flex, by default, has flex-row. Therefore, it can be omitted.
   const rowOrColumn =
     node.layoutMode === "HORIZONTAL"
-      ? formatWithJSX("flex-direction", isJsx, "row")
-      : formatWithJSX("flex-direction", isJsx, "column");
+      ? format("flex-direction", isJsx, "row")
+      : format("flex-direction", isJsx, "column");
 
   // special case when there is only one children; need to position correctly in Flex.
   // let justify = "justify-center";
@@ -266,7 +285,7 @@ export const rowColumnProps = (node: AltFrameNode, isJsx: boolean): string => {
       break;
   }
 
-  primaryAlign = formatWithJSX("justify-content", isJsx, primaryAlign);
+  primaryAlign = format("justify-content", isJsx, primaryAlign);
 
   // [optimization]
   // when all children are STRETCH and layout is Vertical, align won't matter. Otherwise, center it.
@@ -282,7 +301,7 @@ export const rowColumnProps = (node: AltFrameNode, isJsx: boolean): string => {
       counterAlign = "flex-end";
       break;
   }
-  counterAlign = formatWithJSX("align-items", isJsx, counterAlign);
+  counterAlign = format("align-items", isJsx, counterAlign);
 
   // if parent is a Frame with AutoLayout set to Vertical, the current node should expand
   let flex =
@@ -292,7 +311,7 @@ export const rowColumnProps = (node: AltFrameNode, isJsx: boolean): string => {
       ? "flex"
       : "inline-flex";
 
-  flex = formatWithJSX("display", isJsx, flex);
+  flex = format("display", isJsx, flex);
 
   return `${flex}${rowOrColumn}${counterAlign}${primaryAlign}`;
 };
@@ -316,10 +335,17 @@ const addSpacingIfNeeded = (
 
       // don't show the layer name in these separators.
       const style = new ExmlDefaultBuilder(node, false, isJsx).build(
-        formatWithJSX(wh, isJsx, node.parent.itemSpacing)
+        format(wh, isJsx, node.parent.itemSpacing)
       );
       return `\n<div${style}></div>`;
     }
   }
   return "";
+};
+
+export const parse = (
+  node: SceneNode,
+) => {
+  let name = node.getPluginData("name")
+  console.log("name:"+node.name+name)
 };

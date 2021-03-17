@@ -2,7 +2,7 @@
   "name": "figma-to-exml",
   "version": "1.0.0",
   "devDependencies": {
-    "@figma/plugin-typings": "^1.19.1",
+    "@figma/plugin-typings": "^1.19.2",
     "@fullhuman/postcss-purgecss": "^2.3.0",
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-image": "^2.0.4",

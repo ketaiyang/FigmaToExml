@@ -24,6 +24,7 @@
 	//set value if this var to same value as radio item to set initial selection
 	// var switchValue;
 	import ScreenExml from "./ScreenExml.svelte";
+	import ScreenProperty from "./ScreenProperty.svelte";
 	// import ScreenFlutter from "./ScreenFlutter.svelte";
 	// import ScreenSwiftUI from "./ScreenSwiftUI.svelte";
 	// import ScreenHTML from "./ScreenHtml.svelte";
@@ -42,6 +43,7 @@
   
 	<TabList>
 	  <Tab>Exml</Tab>
+	  <Tab>Property</Tab>
 	  <!-- <Tab>Flutter</Tab>
 	  <Tab>SwiftUI</Tab>
 	  <Tab>HTML</Tab>
@@ -53,7 +55,7 @@
 	</TabPanel>
   
 	<TabPanel>
-	  <!-- <ScreenFlutter on:clipboard={updateClipboard} /> -->
+	  <ScreenProperty/>
 	</TabPanel>
   
 	<TabPanel>

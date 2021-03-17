@@ -3,22 +3,22 @@ import { exmlTextSize as exmlTextSizeBox } from "./builderImpl/exmlTextSize";
 import { AltTextNode } from "../altNodes/altMixins";
 import { ExmlDefaultBuilder } from "./exmlDefaultBuilder";
 import { commonLetterSpacing } from "../common/commonTextHeightSpacing";
-import { formatWithJSX } from "../common/parseJSX";
+import { format } from "../common/parse";
 import { convertFontWeight } from "../common/convertFontWeight";
 
 export class ExmlTextBuilder extends ExmlDefaultBuilder {
-  constructor(node: AltTextNode, showLayerName: boolean, optIsJSX: boolean) {
-    super(node, showLayerName, optIsJSX);
+  constructor(node: TextNode) {
+    super(node);
   }
 
   // must be called before Position method
-  textAutoSize(node: AltTextNode): this {
+  textAutoSize(node: TextNode): this {
     if (node.textAutoResize === "NONE") {
       // going to be used for position
       this.hasFixedSize = true;
     }
 
-    this.style += exmlTextSizeBox(node, this.isJSX);
+    this.style += exmlTextSizeBox(node);
     return this;
   }
 
@@ -35,7 +35,7 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
     // example: text-md
     if (node.fontSize !== figma.mixed) {
       const value = node.fontSize;
-      this.style += formatWithJSX("font-size", this.isJSX, value);
+      this.style += format("size", value);
     }
 
     return this;
@@ -51,7 +51,7 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
       const lowercaseStyle = node.fontName.style.toLowerCase();
 
       if (lowercaseStyle.match("italic")) {
-        this.style += formatWithJSX("font-style", this.isJSX, "italic");
+        this.style += format("font-style", this.isJSX, "italic");
       }
 
       if (lowercaseStyle.match("regular")) {
@@ -67,7 +67,7 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
       const weight = convertFontWeight(value);
 
       if (weight !== null && weight !== "400") {
-        this.style += formatWithJSX("font-weight", this.isJSX, weight);
+        this.style += format("font-weight", this.isJSX, weight);
       }
     }
     return this;
@@ -80,7 +80,7 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
   letterSpacing(node: AltTextNode): this {
     const letterSpacing = commonLetterSpacing(node);
     if (letterSpacing > 0) {
-      this.style += formatWithJSX("letter-spacing", this.isJSX, letterSpacing);
+      this.style += format("letter-spacing", this.isJSX, letterSpacing);
     }
 
     return this;
@@ -93,17 +93,17 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
     if (node.lineHeight !== figma.mixed) {
       switch (node.lineHeight.unit) {
         case "AUTO":
-          this.style += formatWithJSX("line-height", this.isJSX, "100%");
+          this.style += format("line-height", this.isJSX, "100%");
           break;
         case "PERCENT":
-          this.style += formatWithJSX(
+          this.style += format(
             "line-height",
             this.isJSX,
             `${numToAutoFixed(node.lineHeight.value)}%`
           );
           break;
         case "PIXELS":
-          this.style += formatWithJSX(
+          this.style += format(
             "line-height",
             this.isJSX,
             node.lineHeight.value
@@ -127,13 +127,13 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
       // todo when node.textAutoResize === "WIDTH_AND_HEIGHT" and there is no \n in the text, this can be ignored.
       switch (node.textAlignHorizontal) {
         case "CENTER":
-          this.style += formatWithJSX("text-align", this.isJSX, "center");
+          this.style += format("text-align", this.isJSX, "center");
           break;
         case "RIGHT":
-          this.style += formatWithJSX("text-align", this.isJSX, "right");
+          this.style += format("text-align", this.isJSX, "right");
           break;
         case "JUSTIFIED":
-          this.style += formatWithJSX("text-align", this.isJSX, "justify");
+          this.style += format("text-align", this.isJSX, "justify");
           break;
       }
     }
@@ -147,11 +147,11 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
    */
   textTransform(node: AltTextNode): this {
     if (node.textCase === "LOWER") {
-      this.style += formatWithJSX("text-transform", this.isJSX, "lowercase");
+      this.style += format("text-transform", this.isJSX, "lowercase");
     } else if (node.textCase === "TITLE") {
-      this.style += formatWithJSX("text-transform", this.isJSX, "capitalize");
+      this.style += format("text-transform", this.isJSX, "capitalize");
     } else if (node.textCase === "UPPER") {
-      this.style += formatWithJSX("text-transform", this.isJSX, "uppercase");
+      this.style += format("text-transform", this.isJSX, "uppercase");
     } else if (node.textCase === "ORIGINAL") {
       // default, ignore
     }
@@ -165,9 +165,9 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
    */
   textDecoration(node: AltTextNode): this {
     if (node.textDecoration === "UNDERLINE") {
-      this.style += formatWithJSX("text-decoration", this.isJSX, "underline");
+      this.style += format("text-decoration", this.isJSX, "underline");
     } else if (node.textDecoration === "STRIKETHROUGH") {
-      this.style += formatWithJSX(
+      this.style += format(
         "text-decoration",
         this.isJSX,
         "line-through"

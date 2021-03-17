@@ -1,4 +1,4 @@
-import { formatWithJSX } from "../../common/parseJSX";
+import { format } from "../../common/parse";
 import { numToAutoFixed } from "../../common/numToAutoFixed";
 import { AltFrameMixin, AltDefaultShapeMixin } from "../../altNodes/altMixins";
 import { commonPadding } from "../../common/commonPadding";
@@ -17,31 +17,31 @@ export const exmlPadding = (
   }
 
   if ("all" in padding) {
-    return formatWithJSX("padding", isJsx, padding.all);
+    return format("padding", isJsx, padding.all);
   }
 
   let comp = "";
 
   // horizontal and vertical, as the default AutoLayout
   if (padding.horizontal) {
-    comp += formatWithJSX("padding-left", isJsx, padding.horizontal);
-    comp += formatWithJSX("padding-right", isJsx, padding.horizontal);
+    comp += format("padding-left", isJsx, padding.horizontal);
+    comp += format("padding-right", isJsx, padding.horizontal);
   }
   if (padding.vertical) {
-    comp += formatWithJSX("padding-top", isJsx, padding.vertical);
-    comp += formatWithJSX("padding-bottom", isJsx, padding.vertical);
+    comp += format("padding-top", isJsx, padding.vertical);
+    comp += format("padding-bottom", isJsx, padding.vertical);
   }
   if (padding.top) {
-    comp += formatWithJSX("padding-top", isJsx, padding.top);
+    comp += format("padding-top", isJsx, padding.top);
   }
   if (padding.bottom) {
-    comp += formatWithJSX("padding-bottom", isJsx, padding.bottom);
+    comp += format("padding-bottom", isJsx, padding.bottom);
   }
   if (padding.left) {
-    comp += formatWithJSX("padding-left", isJsx, padding.left);
+    comp += format("padding-left", isJsx, padding.left);
   }
   if (padding.right) {
-    comp += formatWithJSX("padding-right", isJsx, padding.right);
+    comp += format("padding-right", isJsx, padding.right);
   }
 
   // todo use REM
