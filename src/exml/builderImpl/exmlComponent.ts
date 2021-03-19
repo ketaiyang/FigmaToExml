@@ -1,85 +1,106 @@
-export const parse = (
-    node: SceneNode,
-) : Array<[string, string]> => {
-
-    let arr : Array<[string, string]>
-    let name = node.getPluginData("name")
-    console.log("name"+node.name+name)
-
-    if (name in components){
-        let comp = components[name]
-        arr.push(["name", name])
-
-        comp.property.forEach(key => {
-            let value = node.getPluginData(key)
-            arr.push([key, value])
-        });
-    }
-
-    return arr
-};
-
-export const component =["btn","fp"];
+export const properties = {
+    id : ["id", "ID"],
+    skinname : ["skinName", "皮肤"],
+    source : ["source", "资源名"],
+    fillAlpha : ["fillAlpha", "透明度"],
+}
+//每个组件都有的属性
+export const common = [properties.id];
 export const components = {
-    //Button
-    "btn" : {
+    "Button" : {
         "property" : [
-            "id",
-            "skinName"
+            properties.skinname,
         ],
-        "name" : "e:Button"
+        "head" : "e:Button"
     },
-    //FirstPanel
-    "fp" : {
+    "Label" : {
         "property" : [
-            "id",
-            "skinName"
         ],
-        "name" : "e:FirstPanel"
+        "head" : "e:Label",
+        "fix" : true
     },
-    //SecondPanel
-    "sp" : {
+    "Image" : {
         "property" : [
-            "id",
-            "skinName"
+            properties.source,
         ],
-        "name" : "e:SecondPanel"
+        "head" : "e:Image",
+        "fix" : true
     },
-    //Group
-    "grp" : {
+    "Group" : {
         "property" : [
-            "id",
         ],
-        "name" : "e:Group"
+        "head" : "e:Group",
+        "child" : true
     },
-    //Scroller
-    "src" : {
+    "Rect" : {
         "property" : [
-            "id",
+            properties.fillAlpha,
         ],
-        "name" : "e:Scroller"
+        "head" : "e:Rect",
+        "fix" : true
     },
-    //List
-    "lst" : {
+    "Scroller" : {
         "property" : [
-            "id",
         ],
-        "name" : "e:List"
+        "head" : "e:Scroller",
+        "child" : true
     },
-    //Image
-    "img" : {
+    "List" : {
         "property" : [
-            "id",
-            "source",
         ],
-        "name" : "e:Image"
+        "head" : "e:List",
     },
-    //Rect
-    "rect" : {
+    "RadioButton" : {
         "property" : [
-            "id",
-            "fillAlpha",
+            properties.skinname,
         ],
-        "name" : "e:Rect"
+        "head" : "e:RadioButton"
     },
+    "ProgressBar" : {
+        "property" : [
+            properties.skinname,
+        ],
+        "head" : "e:ProgressBar"
+    },
+    "FirstPanel" : {
+        "property" : [
+            properties.skinname,
+        ],
+        "head" : "e:FirstPanel",
+        "child" : true
+    },
+    "SecondPanel" : {
+        "property" : [
+            properties.skinname,
+        ],
+        "head" : "e:SecondPanel",
+        "child" : true
+    },
+    "ConsumeWidget" : {
+        "property" : [
+            properties.skinname,
+        ],
+        "head" : "euiex:ConsumeWidget"
+    },
+    "FightPowerWidget" : {
+        "property" : [
+            properties.skinname,
+        ],
+        "head" : "euiex:FightPowerWidget"
+    },
+    "ItemGrid" : {
+        "property" : [
+        ],
+        "head" : "euiex:ItemGrid"
+    },
+    "ItemGrid80x" : {
+        "property" : [
+        ],
+        "head" : "euiex:ItemGrid80x"
+    },
+    "RoleHead" : {
+        "property" : [
+        ],
+        "head" : "euiex:RoleHead"
+    }
 };

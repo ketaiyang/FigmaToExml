@@ -10,7 +10,8 @@ import { ExmlTextBuilder } from "./exmlTextBuilder";
 import { ExmlDefaultBuilder as ExmlDefaultBuilder } from "./exmlDefaultBuilder";
 import { format } from "../common/parse";
 import { indentString } from "../common/indentString";
-import { components } from "./builderImpl/exmlComp";
+import { components, common as comComps, properties } from "./builderImpl/exmlComponent";
+import { retrieveTopFill } from "../common/retrieveFill";
 
 let parentId = "";
 
@@ -67,10 +68,6 @@ const exmlWidgetGenerator = (
 
   //   // todo support Line
   // });
-  components.btn.property.forEach(element => {
-    console.log("1111111111111111"+(typeof element))
-  });
-  // console.log("1111111111111111"+components.btn.property)
 
   const visibleNode = nodes.filter((d) => d.visible != false && !d.name.trimStart().startsWith("ignore"))
   visibleNode.forEach((node, index) => {
@@ -131,7 +128,7 @@ const exmlText = (
 ): string | [string, string] => {
   // follow the website order, to make it easier
 
-  const builderResult = new ExmlTextBuilder(node, showLayerName, isJsx)
+  const builderResult = new ExmlTextBuilder(node)
     .blend(node)
     .textAutoSize(node)
     .position(node, parentId)
@@ -343,9 +340,95 @@ const addSpacingIfNeeded = (
   return "";
 };
 
-export const parse = (
+export const compParse = (
   node: SceneNode,
-) => {
+) : {}=> {
+
+  let dict = {}
+
   let name = node.getPluginData("name")
-  console.log("name:"+node.name+name)
+  if (node.type === "FRAME" || node.type === "GROUP"){
+    if (name === ""){
+      name = "Group"
+    }
+  } else if (node.type === "RECTANGLE"){
+    let fill = retrieveTopFill(node.fills)
+    if (fill.type === "SOLID"){
+      name = "Rect"
+      dict["fix"] = true
+    } else if (fill.type === "IMAGE"){
+      name = "Image"
+      dict["fix"] = true
+    }
+  } else if (node.type === "TEXT"){
+    name = "Label"
+    dict["fix"] = true
+  }
+  console.log("anme"+name)
+  if (name in components){
+    dict["name"] = name
+    dict["property"] = new Array()
+
+    comComps.forEach(element => {
+        let key = element[0]
+        let value = node.getPluginData(key)
+        let cn = element[1]
+        let type = element[2]
+        dict["property"].push([key, value, cn])
+    })
+
+    let comps = components[name]
+    comps.property.forEach(element => {
+        let key = element[0]
+        let value = node.getPluginData(key)
+        let cn = element[1]
+        let type = element[2]
+        dict["property"].push([key, value, cn])
+    });
+  }
+
+  return dict
 };
+
+export const setProperty = (
+  curNode : SceneNode,
+  data : any
+) => {
+  data.forEach(element => {
+    let key = element[0]
+    let value = element[1]
+    if (key === "name") {
+      let oldName = curNode.getPluginData("name")
+      if (oldName != "" && oldName != key) {
+        Object.keys(properties).forEach(key => {
+          curNode.setPluginData(properties[key][0], "")
+        })
+      }
+    }
+    curNode.setPluginData(key, value)
+    if (key === "name") {
+      // let split_name = currentSelection.name.split("|")
+      // if (split_name.length > 1) {
+      //   currentSelection.name = `${value}${value===""?"":"|"}${split_name.slice(1).join("|")}`
+      // } else{
+      //   currentSelection.name = `${value}${value===""?"":"|"}${currentSelection.name}`
+      // }
+      let idValue = curNode.getPluginData("id")
+      if (value != "")
+        curNode.name = `${value}${idValue===""?"":("-"+idValue)}`
+      else
+        curNode.name = curNode.type.charAt(0) + curNode.type.slice(1).toLowerCase()
+    }
+    if (key === "id") {
+      // let split_name = currentSelection.name.split("|")
+      // if (split_name.length > 1) {
+      //   currentSelection.name = `${split_name[0].split("-")[0]}${value===""?"":"-"}${value}|${split_name.slice(1).join("|")}`
+      // }
+      let nameValue = curNode.getPluginData("name")
+      if (nameValue != "")
+        curNode.name = `${nameValue}-${value}`
+      else
+        curNode.name = curNode.type.charAt(0) + curNode.type.slice(1).toLowerCase()
+    }
+  });
+}

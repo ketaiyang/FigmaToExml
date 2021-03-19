@@ -1,12 +1,10 @@
 <script>
-  import {component} from "../exml/builderImpl/exmlComp";
+  import {components} from "../exml/builderImpl/exmlComponent";
 
-  let node;
   let emptySelection = false;
-  let selected;
-	let answer = '';
 
-  $: nodeObservable = node;
+  let arrData = new Array();
+  let dict = {};
 
   // INIT
   import { onMount } from "svelte";
@@ -24,28 +22,67 @@
     }
 
     if (event.data.pluginMessage.type === "result") {
-      console.log(event.data.pluginMessage.data)
+      dict = event.data.pluginMessage.data
+      console.log(dict)
+      // dict = {}
+      // if (arrData && arrData.length > 0){
+      //   arrData.forEach(element => {
+      //     dict[element[0]] = element[1]
+      //   });
+      // }
     }
   };
 
-  const onSelect = () =>{
-    console.log(selected)
-    // parent.postMessage({ pluginMessage: { type: "property", data:  } }, "*");
+  const onSelect = (target) =>{
+    console.log("select value:"+target.value)
+    parent.postMessage({ pluginMessage: { type: "property", data: [["name",target.value]] } }, "*");
+  }
+
+  const onInput = (target) =>{
+    console.log("input change:"+target.name+","+target.value)
+    parent.postMessage({ pluginMessage: { type: "property", data: [[target.name,target.value]] } }, "*");
   }
 </script>
 
+<!-- svelte-ignore empty-block -->
+{#if emptySelection}
+
+{:else}
 <!-- <div> -->
-  <select bind:value={selected} on:change="{()=>onSelect()}" on:blur="">
-    {#each component as comp}
-      {#if node && node.getPluginData("name")==comp}
-        <option value={comp} selected>
-          {comp}
-        </option>
+  <p class="text-lg font-bold">组件：</p>
+  <select class="border border-gray-400 rounded" on:change="{event=>onSelect(event.target)}" on:blur="">
+    {#if dict["fix"]}
+      <option value={dict["name"]} selected>
+        {dict["name"]}
+      </option>
+    {:else}
+      {#each Object.keys(components) as comp}
+        {#if dict["name"] && dict["name"]==comp}
+          <option value={comp} selected>
+            {comp}
+          </option>
+        {:else if !components[comp].fix}
+          <option value={comp}>
+            {comp}
+          </option>
+        {/if}
+      {/each}
+
+      {#if !dict["name"]}
+        <option value="" selected />
       {:else}
-        <option value={comp}>
-          {comp}
-        </option>
+        <option value="" />
       {/if}
-    {/each}
+    {/if}
   </select>
 <!-- </div> -->
+  {#if dict["property"]}
+    {#each dict["property"] as arr}
+      <!-- {#if arr[0] != "name"} -->
+        <div class="h-2" />
+        <p class="text-lg font-bold">{arr[2]}</p>
+        <input class="border border-gray-400 rounded" value={arr[1]} name={arr[0]} on:change="{event => onInput(event.target)}">
+      <!-- {/if} -->
+    {/each}
+  {/if}
+{/if}

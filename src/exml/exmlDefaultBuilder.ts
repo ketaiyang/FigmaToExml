@@ -39,9 +39,9 @@ export class ExmlDefaultBuilder {
     }
   }
 
-  blend(node: AltSceneNode): this {
+  blend(node: SceneNode): this {
     this.style += exmlVisibility(node, this.isJSX);
-    this.style += exmlRotation(node, this.isJSX);
+    this.style += exmlRotation(node);
     this.style += exmlOpacity(node, this.isJSX);
 
     return this;

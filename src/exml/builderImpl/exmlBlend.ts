@@ -2,6 +2,7 @@ import { AltBlendMixin } from "../../altNodes/altMixins";
 import { AltLayoutMixin, AltSceneNode } from "../../altNodes/altMixins";
 import { numToAutoFixed } from "../../common/numToAutoFixed";
 import { format } from "../../common/parse";
+import { components } from "../builderImpl/exmlComponent"
 
 /**
  * https://tailwindcss.com/docs/opacity/
@@ -43,15 +44,30 @@ export const exmlVisibility = (node: AltSceneNode, isJsx: boolean): string => {
  * default is [-180, -90, -45, 0, 45, 90, 180], but '0' will be ignored:
  * if rotation was changed, let it be perceived. Therefore, 1 => 45
  */
-export const exmlRotation = (node: AltLayoutMixin, isJsx: boolean): string => {
+export const exmlRotation = (node: SceneNode): string => {
   // that's how you convert angles to clockwise radians: angle * -pi/180
   // using 3.14159 as Pi for enough precision and to avoid importing math lib.
   if (node.rotation !== undefined && Math.round(node.rotation) !== 0) {
     return format(
-      "transform",
-      isJsx,
-      `rotate(${numToAutoFixed(node.rotation)}deg)`
+      "rotation",
+      node.rotation
     );
   }
   return "";
 };
+
+export const exmlProperty = (node :SceneNode): string => {
+  let style = ""
+  let name = node.getPluginData("name")
+  if (name != ""){
+    let comp = components[name]
+    if (comp){
+      comp.property.forEach(element => {
+        let value = node.getPluginData(element[0])
+        if (value != "")
+          style += format(element[0], value)
+      });
+    }
+  }
+  return style
+}

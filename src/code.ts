@@ -8,12 +8,12 @@
 // import { tailwindMain } from "./tailwind/tailwindMain";
 // import { flutterMain } from "./flutter/flutterMain";
 import { convertIntoAltNodes } from "./altNodes/altConversion";
-import { exmlMain, parse } from "./exml/exmlMain"
-import { parse as exmlParse } from "./exml/builderImpl/exmlComponent";
+import { exmlMain, compParse, setProperty } from "./exml/exmlMain"
 
 let parentId: string;
 let isJsx = false;
 let layerName = false;
+let currentSelection: SceneNode;
 // let material = true;
 
 let mode: "exml" | "property";
@@ -41,11 +41,8 @@ const run = () => {
     null
   );
 
-  console.log('length:'+figma.currentPage.selection.length)
-  if (figma.currentPage.selection[0].type == "FRAME"){
-    console.log(figma.currentPage.selection[0].children.length)
-  }
-  const currentSelection = figma.currentPage.selection[0]
+  currentSelection = figma.currentPage.selection[0]
+  console.log(currentSelection.type)
   // const nodes = currentSelection.findAll(node => node.visible != false)
   nodes = Array<SceneNode>()
   traverse(currentSelection)
@@ -73,10 +70,13 @@ const run = () => {
       });
     }
   }else if (mode == "property"){
-    figma.ui.postMessage({
-      type: "result",
-      data: exmlParse(currentSelection),
-    });
+    if (currentSelection.parent){
+      console.log("11111111111111")
+      figma.ui.postMessage({
+        type: "result",
+        data: compParse(currentSelection),
+      });
+    }
   }
 
 //   console.log(result);
@@ -117,9 +117,11 @@ figma.ui.onmessage = (msg) => {
   {
     mode = msg.type;
     run();
-  }else if (msg.type === "property") 
-  {
+  } else if (msg.type === "property") {
     mode = msg.type;
+    if (msg.data) {
+      setProperty(currentSelection, msg.data)
+    }
     run();
   } 
 //   else if (msg.type === "jsx" && msg.data !== isJsx) {
