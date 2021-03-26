@@ -12,6 +12,6 @@ export const exmlTextSize = (node: TextNode): string => {
   if (node.textAutoResize === "NONE") {
     comp += height;
   }
-
+  
   return comp;
 };

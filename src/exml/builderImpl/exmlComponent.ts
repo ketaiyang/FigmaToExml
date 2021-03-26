@@ -1,30 +1,69 @@
 export const properties = {
-    id : ["id", "ID"],
-    skinname : ["skinName", "皮肤"],
-    source : ["source", "资源名"],
-    fillAlpha : ["fillAlpha", "透明度"],
+    class : ["class", "类名", "text"],
+    id : ["id", "ID", "text"],
+    skinname : ["skinName", "皮肤", "text"],
+    source : ["source", "资源名", "text"],
+    label : ["label", "标签", "text"],
+    font : ["font", "位图字体", "text"],
+    inputType : ["inputType", "输入类型", "text"],
+    currentState : ["currentState", "当前状态", "text"]
 }
 //每个组件都有的属性
 export const common = [properties.id];
 export const components = {
-    "Button" : {
+    "Skin" : {
         "property" : [
+            properties.class
+        ],
+        "fix" : true
+    },
+    "Button" :  {
+        "property" : [
+            properties.label,
             properties.skinname,
         ],
-        "head" : "e:Button"
+        "head" : "e:Button",
+        "adaptive" : true
+    },
+    "RadioButton" :  {
+        "property" : [
+            properties.label,
+            properties.skinname,
+        ],
+        "head" : "e:RadioButton",
+        "adaptive" : true
+    },
+    "ToggleButton" :  {
+        "property" : [
+            properties.label,
+            properties.skinname,
+        ],
+        "head" : "e:ToggleButton",
+        "adaptive" : true
     },
     "Label" : {
         "property" : [
         ],
         "head" : "e:Label",
-        "fix" : true
+    },
+    "EditableText" : {
+        "property" : [
+            properties.inputType
+        ],
+        "head" : "e:EditableText"
+    },
+    "BitmapLabel" : {
+        "property" : [
+            properties.font,
+        ],
+        "head" : "e:BitmapLabel",
     },
     "Image" : {
         "property" : [
             properties.source,
         ],
         "head" : "e:Image",
-        "fix" : true
+        "adaptive" : true
     },
     "Group" : {
         "property" : [
@@ -34,10 +73,8 @@ export const components = {
     },
     "Rect" : {
         "property" : [
-            properties.fillAlpha,
         ],
         "head" : "e:Rect",
-        "fix" : true
     },
     "Scroller" : {
         "property" : [
@@ -50,57 +87,68 @@ export const components = {
         ],
         "head" : "e:List",
     },
-    "RadioButton" : {
-        "property" : [
-            properties.skinname,
-        ],
-        "head" : "e:RadioButton"
-    },
     "ProgressBar" : {
         "property" : [
             properties.skinname,
         ],
-        "head" : "e:ProgressBar"
+        "head" : "e:ProgressBar",
+        "adaptive" : true
+    },
+    "CheckBox" : {
+        "property" : [
+            properties.label,
+            properties.skinname,
+        ],
+        "head" : "e:CheckBox",
+        "adaptive" : true
     },
     "FirstPanel" : {
         "property" : [
             properties.skinname,
         ],
         "head" : "e:FirstPanel",
-        "child" : true
+        "child" : true,
+        "adaptive" : true
     },
     "SecondPanel" : {
         "property" : [
             properties.skinname,
         ],
         "head" : "e:SecondPanel",
-        "child" : true
+        "child" : true,
+        "adaptive" : true
     },
     "ConsumeWidget" : {
         "property" : [
             properties.skinname,
         ],
-        "head" : "euiex:ConsumeWidget"
+        "head" : "euiex:ConsumeWidget",
+        "adaptive" : true
     },
     "FightPowerWidget" : {
         "property" : [
             properties.skinname,
+            properties.currentState
         ],
-        "head" : "euiex:FightPowerWidget"
+        "head" : "euiex:FightPowerWidget",
+        "adaptive" : true
     },
     "ItemGrid" : {
         "property" : [
         ],
-        "head" : "euiex:ItemGrid"
+        "head" : "euiex:ItemGrid",
+        "adaptive" : true
     },
     "ItemGrid80x" : {
         "property" : [
         ],
-        "head" : "euiex:ItemGrid80x"
+        "head" : "euiex:ItemGrid80x",
+        "adaptive" : true
     },
     "RoleHead" : {
         "property" : [
         ],
-        "head" : "euiex:RoleHead"
+        "head" : "euiex:RoleHead",
+        "adaptive" : true
     }
 };

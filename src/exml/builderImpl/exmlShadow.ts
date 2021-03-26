@@ -1,11 +1,9 @@
 import { exmlColor } from "./exmlColor";
 import { AltBlendMixin } from "../../altNodes/altMixins";
+import { format } from "../../common/parse";
 
-/**
- * https://tailwindcss.com/docs/box-shadow/
- * example: shadow
- */
-export const exmlShadow = (node: AltBlendMixin): string => {
+export const exmlShadow = (node: BlendMixin): string => {
+  let property = ""
   // [when testing] node.effects can be undefined
   if (node.effects && node.effects.length > 0) {
     const dropShadow = node.effects.filter(
@@ -23,8 +21,12 @@ export const exmlShadow = (node: AltBlendMixin): string => {
       const spread = shadow.spread ? `${shadow.spread}px ` : "";
       const inner = shadow.type === "INNER_SHADOW" ? " inset" : "";
 
-      return `${x}px ${y}px ${blur}px ${spread}${color}${inner}`;
+      property += format("shadow", "true")
+      property += format("shadowBlur", blur)
+      property += format("shadowColor", color)
+      property += format("shadowOffsetX", x)
+      property += format("shadowOffsetY", y)
     }
   }
-  return "";
+  return property;
 };

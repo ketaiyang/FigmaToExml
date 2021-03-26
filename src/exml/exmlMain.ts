@@ -7,11 +7,13 @@ import {
   AltGroupNode,
 } from "../altNodes/altMixins";
 import { ExmlTextBuilder } from "./exmlTextBuilder";
+import { ExmlRectBuilder } from "./exmlRectBuilder";
 import { ExmlDefaultBuilder as ExmlDefaultBuilder } from "./exmlDefaultBuilder";
 import { format } from "../common/parse";
 import { indentString } from "../common/indentString";
 import { components, common as comComps, properties } from "./builderImpl/exmlComponent";
 import { retrieveTopFill } from "../common/retrieveFill";
+import { getCompType } from "./builderImpl/exmlCustom"
 
 let parentId = "";
 
@@ -28,21 +30,20 @@ export const exmlMain = (
   showLayerName = layerName;
 
   let result = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-  let generator = exmlWidgetGenerator(sceneNode, isJsx, node.children);
-  result += `\n<e:Skin width="${node.width}" height="${node.height}" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing">${indentString(generator)}\n</e:Skin>`
+  let classname = node.getPluginData(properties.class[0])
+  let generator = exmlWidgetGenerator(node.children);
+  result += `\n<e:Skin ${classname.trim()!==""?`class="${classname} "`:""}width="${node.width}" height="${node.height}" xmlns:e="http://ns.egret.com/eui" xmlns:w="http://ns.egret.com/wing" xmlns:euiex="euiex.*">${indentString(generator)}\n</e:Skin>`
 
   // remove the initial \n that is made in Container.
-  if (result.length > 0 && result.slice(0, 1) === "\n") {
-    result = result.slice(1, result.length);
-  }
+  // if (result.length > 0 && result.slice(0, 1) === "\n") {
+  //   result = result.slice(1, result.length);
+  // }
 
   return result;
 };
 
 // todo lint idea: replace BorderRadius.only(topleft: 8, topRight: 8) with BorderRadius.horizontal(8)
 const exmlWidgetGenerator = (
-  sceneNode: ReadonlyArray<AltSceneNode>,
-  isJsx: boolean,
   nodes : ReadonlyArray<SceneNode> = null
 ): string => {
   let comp = "";
@@ -71,27 +72,72 @@ const exmlWidgetGenerator = (
 
   const visibleNode = nodes.filter((d) => d.visible != false && !d.name.trimStart().startsWith("ignore"))
   visibleNode.forEach((node, index) => {
-    if (node.type === "TEXT"){
-      if (node.fontName !== figma.mixed){
-        console.log(node.fontName.style)
-        console.log(node.constraints.horizontal)
-        console.log(node.getPluginData("id"))
-        // node.setPluginData("id","256")
+    // if (node.type === "TEXT"){
+    //   comp += exmlText(node);
+    // } else if (node.type === "RECTANGLE") {
+    //   let fill = retrieveTopFill(node.fills)
+    //   if (fill.type === "SOLID"){
+    //     comp += exmlRect(node)
+    //   } else if (fill.type === "IMAGE"){
+
+    //   }
+    // }
+
+    let name = node.getPluginData("name")
+    let compType = getCompType(node, name)
+    if (compType) {
+      if (compType.length > 1) {
+        if (name === undefined || name === "") {
+          comp += exmlComp(node, compType[0])
+        } else {
+          comp += exmlComp(node, name)
+        }
+      } else {
+        comp += exmlComp(node, compType[0])
       }
-      // comp += exmlText(node);
+    } else {
+      comp += exmlContainer(node)
     }
-    console.log(node.name+node.type+("constraints" in node))
-    // console.log(node.name+node.constraints.horizontal)
-    if ("constraints" in node) {
-      // if(node.parent.type === "COMPONENT"){
-      //   node.parent.width
-      // }
-      console.log(node.name+node.constraints.horizontal)
-    }
+    // if (compType === "group") { 
+    //   comp += exmlContainer(node)
+    // } else if (compType === "rect") {
+    //   comp += exmlRect(node as RectangleNode)
+    // } else if (compType === "image") {
+    //   comp += exmlContainer(node)
+    // } else if (compType === "label") {
+    //   if (name === undefined || name === "" || name === "Label") {
+    //     comp += exmlText(node as TextNode);
+    //   } else if (name === "EditableText") {
+    //     comp += exmlEditableText(node as TextNode);
+    //   }
+    // } else {
+    //   comp += exmlContainer(node)
+    // }
+
   });
 
   return comp;
 };
+
+const exmlComp = (node: SceneNode, type: string): string => {
+  let comp = "";
+
+  if (type === "Group") { 
+    comp += exmlContainer(node)
+  } else if (type === "Rect") {
+    comp += exmlRect(node as RectangleNode)
+  } else if (type === "Image") {
+    comp += exmlContainer(node)
+  } else if (type === "Label") {
+    comp += exmlText(node as TextNode);
+  } else if (type === "EditableText") {
+    comp += exmlEditableText(node as TextNode);
+  } else {
+    comp += exmlContainer(node)
+  }
+
+  return comp
+}
 
 const exmlGroup = (node: AltGroupNode, isJsx: boolean = false): string => {
   // ignore the view when size is zero or less
@@ -128,34 +174,76 @@ const exmlText = (
 ): string | [string, string] => {
   // follow the website order, to make it easier
 
-  const builderResult = new ExmlTextBuilder(node)
+  const builder = new ExmlTextBuilder(node)
     .blend(node)
     .textAutoSize(node)
-    .position(node, parentId)
+    .textCharacters(node)
+    .constraint(node)
+    .position(node)
+    .shadow(node)
+    .textStroke(node)
     // todo fontFamily (via node.fontName !== figma.mixed ? `fontFamily: ${node.fontName.family}`)
     // todo font smoothing
     .fontSize(node)
     .fontStyle(node)
-    .letterSpacing(node)
-    .lineHeight(node)
-    .textDecoration(node)
+    // .letterSpacing(node)
+    // .lineHeight(node)
+    // .textDecoration(node)
     // todo text lists (<li>)
     .textAlign(node)
-    .customColor(node.fills, "text")
-    .textTransform(node);
+    .customColor(node.fills, "textColor")
+    // .textTransform(node);
 
-  const splittedChars = node.characters.split("\n");
-  const charsWithLineBreak =
-    splittedChars.length > 1
-      ? node.characters.split("\n").join("<br/>")
-      : node.characters;
+  // const splittedChars = node.characters.split("\n");
+  // const charsWithLineBreak =
+  //   splittedChars.length > 1
+  //     ? node.characters.split("\n").join("<br/>")
+  //     : node.characters;
 
-  if (isInput) {
-    return [builderResult.style, charsWithLineBreak];
-  } else {
-    return `\n<p${builderResult.build()}>${charsWithLineBreak}</p>`;
-  }
+  // if (isInput) {
+  //   return [builderResult.style, charsWithLineBreak];
+  // } else {
+  //   return `\n<p${builderResult.build()}>${charsWithLineBreak}</p>`;
+  // }
+  return `\n<${builder.comp.head}${builder.build()}/>`
 };
+
+const exmlEditableText = (
+  node: TextNode,
+): string | [string, string] => {
+  // follow the website order, to make it easier
+
+  const builder = new ExmlTextBuilder(node)
+    .blend(node)
+    .textAutoSize(node)
+    .textCharacters(node, "prompt")
+    .constraint(node)
+    .position(node)
+    .shadow(node)
+    .textStroke(node)
+    .fontSize(node)
+    .fontStyle(node)
+    .textAlign(node)
+    .customColor(node.fills, "promptColor")
+
+  return `\n<${builder.comp.head}${builder.build()}/>`
+};
+
+const exmlRect = (
+  node: RectangleNode
+) : string => {
+  const builder = new ExmlRectBuilder(node)
+    .blend(node)
+    .position(node)
+    .constraint(node)
+    .widthHeight(node)
+    .customColor(node.fills, "fillColor")
+    .rectAlpha(node)
+    .rectStroke(node)
+    .rectEllipse(node)
+
+  return `\n<${builder.comp.head}${builder.build()}/>`
+}
 
 const exmlFrame = (node: AltFrameNode, isJsx: boolean = false): string => {
   // const vectorIfExists = tailwindVector(node, isJsx);
@@ -191,44 +279,25 @@ const exmlFrame = (node: AltFrameNode, isJsx: boolean = false): string => {
 // properties named propSomething always take care of ","
 // sometimes a property might not exist, so it doesn't add ","
 export const exmlContainer = (
-  node: AltFrameNode | AltRectangleNode | AltEllipseNode,
-  children: string,
-  additionalStyle: string = "",
-  isJsx: boolean,
-  isInput: boolean = false
+  node: SceneNode,
 ): string => {
-  // ignore the view when size is zero or less
-  // while technically it shouldn't get less than 0, due to rounding errors,
-  // it can get to values like: -0.000004196293048153166
-  if (node.width <= 0 || node.height <= 0) {
-    return children;
-  }
 
-  const builder = new ExmlDefaultBuilder(node, showLayerName, isJsx)
+  const builder = new ExmlDefaultBuilder(node)
     .blend(node)
-    .autoLayoutPadding(node)
+    .constraint(node)
+    .position(node)
     .widthHeight(node)
-    .position(node, parentId)
-    .customColor(node.fills, "background-color")
-    // TODO image and gradient support (tailwind does not support gradients)
-    .shadow(node)
-    .border(node);
-
-  if (isInput) {
-    return `\n<input${builder.build(additionalStyle)}>${children}</input>`;
-  }
-
-  if (builder.style || additionalStyle) {
-    const build = builder.build(additionalStyle);
-
-    if (children) {
-      return `\n<div${build}>${indentString(children)}\n</div>`;
+  
+  if (builder.comp.head !== ""){
+    if (builder.comp.child && "children" in node) {
+      return `\n<${builder.comp.head}${builder.build()}>${indentString(exmlWidgetGenerator(node.children))}\n</${builder.comp.head}>`;
     } else {
-      return `\n<div${build}></div>`;
+      return `\n<${builder.comp.head}${builder.build()}/>`;
     }
   }
 
-  return children;
+  console.log(node.name,node.type)
+  return ""
 };
 
 export const rowColumnProps = (node: AltFrameNode, isJsx: boolean): string => {
@@ -339,96 +408,3 @@ const addSpacingIfNeeded = (
   }
   return "";
 };
-
-export const compParse = (
-  node: SceneNode,
-) : {}=> {
-
-  let dict = {}
-
-  let name = node.getPluginData("name")
-  if (node.type === "FRAME" || node.type === "GROUP"){
-    if (name === ""){
-      name = "Group"
-    }
-  } else if (node.type === "RECTANGLE"){
-    let fill = retrieveTopFill(node.fills)
-    if (fill.type === "SOLID"){
-      name = "Rect"
-      dict["fix"] = true
-    } else if (fill.type === "IMAGE"){
-      name = "Image"
-      dict["fix"] = true
-    }
-  } else if (node.type === "TEXT"){
-    name = "Label"
-    dict["fix"] = true
-  }
-  console.log("anme"+name)
-  if (name in components){
-    dict["name"] = name
-    dict["property"] = new Array()
-
-    comComps.forEach(element => {
-        let key = element[0]
-        let value = node.getPluginData(key)
-        let cn = element[1]
-        let type = element[2]
-        dict["property"].push([key, value, cn])
-    })
-
-    let comps = components[name]
-    comps.property.forEach(element => {
-        let key = element[0]
-        let value = node.getPluginData(key)
-        let cn = element[1]
-        let type = element[2]
-        dict["property"].push([key, value, cn])
-    });
-  }
-
-  return dict
-};
-
-export const setProperty = (
-  curNode : SceneNode,
-  data : any
-) => {
-  data.forEach(element => {
-    let key = element[0]
-    let value = element[1]
-    if (key === "name") {
-      let oldName = curNode.getPluginData("name")
-      if (oldName != "" && oldName != key) {
-        Object.keys(properties).forEach(key => {
-          curNode.setPluginData(properties[key][0], "")
-        })
-      }
-    }
-    curNode.setPluginData(key, value)
-    if (key === "name") {
-      // let split_name = currentSelection.name.split("|")
-      // if (split_name.length > 1) {
-      //   currentSelection.name = `${value}${value===""?"":"|"}${split_name.slice(1).join("|")}`
-      // } else{
-      //   currentSelection.name = `${value}${value===""?"":"|"}${currentSelection.name}`
-      // }
-      let idValue = curNode.getPluginData("id")
-      if (value != "")
-        curNode.name = `${value}${idValue===""?"":("-"+idValue)}`
-      else
-        curNode.name = curNode.type.charAt(0) + curNode.type.slice(1).toLowerCase()
-    }
-    if (key === "id") {
-      // let split_name = currentSelection.name.split("|")
-      // if (split_name.length > 1) {
-      //   currentSelection.name = `${split_name[0].split("-")[0]}${value===""?"":"-"}${value}|${split_name.slice(1).join("|")}`
-      // }
-      let nameValue = curNode.getPluginData("name")
-      if (nameValue != "")
-        curNode.name = `${nameValue}-${value}`
-      else
-        curNode.name = curNode.type.charAt(0) + curNode.type.slice(1).toLowerCase()
-    }
-  });
-}

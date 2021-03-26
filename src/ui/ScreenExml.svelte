@@ -4,7 +4,7 @@
 
   let codeData = "";
   let emptySelection = false;
-  let showCode = false;
+  let showCode = true;
   let resUrl = "";
   let exmlName = "";
   let floderName = "";
@@ -57,18 +57,18 @@
   });
 
   // TO EXML
-  import {writeFile} from "../io/fs"
+  import { writeFile } from "../io/fs"
   const toExml = () =>{
-    if (resUrl == null || resUrl == "" || resUrl == undefined || resUrl.split(" ").length != 1) {
-      alert("res url can not be empty!")
-      return
-    }
-    if (exmlName == null || exmlName == "" || exmlName == undefined || exmlName.split(" ").length != 1) {
-      alert("exml name can not be empty!")
-      return
-    }
+    // if (resUrl == null || resUrl == "" || resUrl == undefined || resUrl.split(" ").length != 1) {
+    //   alert("res url can not be empty!")
+    //   return
+    // }
+    // if (exmlName == null || exmlName == "" || exmlName == undefined || exmlName.split(" ").length != 1) {
+    //   alert("exml name can not be empty!")
+    //   return
+    // }
     
-    writeFile("resUrl.txt", resUrl, ()=>{
+    writeFile("_.exml", codeData, ()=>{
       alert("ok")
     })
   }
@@ -132,7 +132,7 @@
   </div>
 </div> -->
 
-<div class="px-2 pt-2 bg-gray-50">
+<!-- <div class="px-2 pt-2 bg-gray-50">
 
   <div class="flex items-center content-center space-x-2">
     <p class="text-lg font-bold">Res Url</p>
@@ -149,7 +149,7 @@
 
   <p class="text-lg font-bold">Img Floder</p>
   <input class="border border-gray-400 rounded" bind:value={floderName} placeholder="input floder name">
-</div>
+</div> -->
 
 <div class="px-2 pt-2 bg-gray-50">
 

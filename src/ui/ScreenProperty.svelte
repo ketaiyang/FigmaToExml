@@ -52,9 +52,23 @@
   <p class="text-lg font-bold">组件：</p>
   <select class="border border-gray-400 rounded" on:change="{event=>onSelect(event.target)}" on:blur="">
     {#if dict["fix"]}
-      <option value={dict["name"]} selected>
-        {dict["name"]}
-      </option>
+      {#if dict["option"]}
+        {#each dict["option"] as option}
+          {#if dict["name"] && dict["name"]==option}
+            <option value={option} selected>
+              {option}
+            </option>
+          {:else}
+            <option value={option}>
+              {option}
+            </option>
+          {/if}
+        {/each}
+      {:else}
+        <option value={dict["name"]} selected>
+          {dict["name"]}
+        </option>
+      {/if}
     {:else}
       {#each Object.keys(components) as comp}
         {#if dict["name"] && dict["name"]==comp}
@@ -81,7 +95,7 @@
       <!-- {#if arr[0] != "name"} -->
         <div class="h-2" />
         <p class="text-lg font-bold">{arr[2]}</p>
-        <input class="border border-gray-400 rounded" value={arr[1]} name={arr[0]} on:change="{event => onInput(event.target)}">
+        <input class="border border-gray-400 rounded" value={arr[1]} name={arr[0]} type="{arr[3]}" on:change="{event => onInput(event.target)}">
       <!-- {/if} -->
     {/each}
   {/if}

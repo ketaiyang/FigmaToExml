@@ -2,7 +2,7 @@ import { AltBlendMixin } from "../../altNodes/altMixins";
 import { AltLayoutMixin, AltSceneNode } from "../../altNodes/altMixins";
 import { numToAutoFixed } from "../../common/numToAutoFixed";
 import { format } from "../../common/parse";
-import { components } from "../builderImpl/exmlComponent"
+import { components, common } from "../builderImpl/exmlComponent"
 
 /**
  * https://tailwindcss.com/docs/opacity/
@@ -10,15 +10,10 @@ import { components } from "../builderImpl/exmlComponent"
  * if opacity was changed, let it be visible. Therefore, 98% => 75
  * node.opacity is between [0, 1]; output will be [0, 100]
  */
-export const exmlOpacity = (node: AltBlendMixin, isJsx: boolean): string => {
+export const exmlAlpha = (node: SceneNode): string => {
   // [when testing] node.opacity can be undefined
-  if (node.opacity !== undefined && node.opacity !== 1) {
-    // formatWithJSX is not called here because opacity unit doesn't end in px.
-    if (isJsx) {
-      return `opacity: ${numToAutoFixed(node.opacity)}, `;
-    } else {
-      return `opacity: ${numToAutoFixed(node.opacity)}; `;
-    }
+  if ("opacity" in node && node.opacity !== undefined && node.opacity !== 1) {
+    return format("alpha", numToAutoFixed(node.opacity))
   }
   return "";
 };
@@ -27,14 +22,14 @@ export const exmlOpacity = (node: AltBlendMixin, isJsx: boolean): string => {
  * https://tailwindcss.com/docs/visibility/
  * example: invisible
  */
-export const exmlVisibility = (node: AltSceneNode, isJsx: boolean): string => {
+export const exmlVisibility = (node: SceneNode): string => {
   // [when testing] node.visible can be undefined
 
   // When something is invisible in Figma, it isn't gone. Groups can make use of it.
   // Therefore, instead of changing the visibility (which causes bugs in nested divs),
   // this plugin is going to ignore color and stroke
   if (node.visible !== undefined && !node.visible) {
-    return format("visibility", isJsx, "hidden");
+    return format("visible", "false");
   }
   return "";
 };
@@ -55,19 +50,3 @@ export const exmlRotation = (node: SceneNode): string => {
   }
   return "";
 };
-
-export const exmlProperty = (node :SceneNode): string => {
-  let style = ""
-  let name = node.getPluginData("name")
-  if (name != ""){
-    let comp = components[name]
-    if (comp){
-      comp.property.forEach(element => {
-        let value = node.getPluginData(element[0])
-        if (value != "")
-          style += format(element[0], value)
-      });
-    }
-  }
-  return style
-}

@@ -8,7 +8,8 @@
 // import { tailwindMain } from "./tailwind/tailwindMain";
 // import { flutterMain } from "./flutter/flutterMain";
 import { convertIntoAltNodes } from "./altNodes/altConversion";
-import { exmlMain, compParse, setProperty } from "./exml/exmlMain"
+import { exmlMain } from "./exml/exmlMain"
+import { compParse, setProperty } from "./exml/builderImpl/exmlCustom"
 
 let parentId: string;
 let isJsx = false;
@@ -21,7 +22,7 @@ let mode: "exml" | "property";
 figma.showUI(__html__, { width: 450, height: 550 });
 
 const run = () => {
-  // ignore when nothing was selected
+  // ignore when nothing was selected || figma.currentPage.selection[0].parent.type !== "PAGE"
   if (figma.currentPage.selection.length === 0 || figma.currentPage.selection.length > 1) {
     figma.ui.postMessage({
       type: "empty",
@@ -34,7 +35,7 @@ const run = () => {
     parentId = figma.currentPage.selection[0].parent?.id ?? "";
   }
 
-  let result = "";
+  // let result = "";
 
   const convertedSelection = convertIntoAltNodes(
     figma.currentPage.selection,
@@ -42,10 +43,10 @@ const run = () => {
   );
 
   currentSelection = figma.currentPage.selection[0]
-  console.log(currentSelection.type)
+  // console.log(currentSelection.parent.type)
   // const nodes = currentSelection.findAll(node => node.visible != false)
-  nodes = Array<SceneNode>()
-  traverse(currentSelection)
+  // nodes = Array<SceneNode>()
+  // traverse(currentSelection)
   // for(const node of nodes){
   //   console.log(node.name)
   // }
@@ -61,22 +62,30 @@ const run = () => {
   //   result = htmlMain(convertedSelection, parentId, isJsx, layerName);
   // }
   if (mode == "exml"){
-    if (currentSelection.type == "FRAME" || currentSelection.type == "GROUP"){
-      result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
+    // currentSelection = retrieveTopFrame(currentSelection)
+    if ((currentSelection.type == "FRAME" || currentSelection.type == "GROUP") && currentSelection.parent.type === "PAGE") {
+      let result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
 
       figma.ui.postMessage({
         type: "result",
         data: result,
       });
+    } else {
+      figma.ui.postMessage({
+        type: "empty",
+      });
     }
   }else if (mode == "property"){
-    if (currentSelection.parent){
-      console.log("11111111111111")
+    // if (currentSelection.parent.type !== "PAGE"){
       figma.ui.postMessage({
         type: "result",
         data: compParse(currentSelection),
       });
-    }
+    // } else{
+    //   figma.ui.postMessage({
+    //     type: "empty",
+    //   });
+    // }
   }
 
 //   console.log(result);
@@ -147,4 +156,11 @@ function traverse(node){
       }
     }
   }
+}
+
+const retrieveTopFrame = (node: SceneNode): SceneNode => {
+  while (node.parent.type === "FRAME" || node.parent.type === "GROUP"){
+    node = node.parent
+  }
+  return node
 }

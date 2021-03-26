@@ -1,6 +1,7 @@
 import { gradientAngle } from "../../common/color";
 import { numToAutoFixed } from "../../common/numToAutoFixed";
 import { retrieveTopFill } from "../../common/retrieveFill";
+import { rgbTo6hex } from "../../common/color";
 
 // retrieve the SOLID color on HTML
 export const exmlColorFromFills = (
@@ -19,20 +20,23 @@ export const exmlColorFromFills = (
 };
 
 export const exmlColor = (color: RGB, alpha: number = 1): string => {
-  const r = numToAutoFixed(color.r * 255);
-  const g = numToAutoFixed(color.g * 255);
-  const b = numToAutoFixed(color.b * 255);
-  const a = numToAutoFixed(alpha ?? 1);
+  const hex = rgbTo6hex(color)
 
-  if (color.r === 1 && color.g === 1 && color.b === 1 && alpha === 1) {
-    return "white";
-  }
+  return `0x${hex}`
+  // const r = numToAutoFixed(color.r * 255);
+  // const g = numToAutoFixed(color.g * 255);
+  // const b = numToAutoFixed(color.b * 255);
+  // const a = numToAutoFixed(alpha ?? 1);
 
-  if (color.r === 0 && color.g === 0 && color.b === 0 && alpha === 1) {
-    return "black";
-  }
+  // if (color.r === 1 && color.g === 1 && color.b === 1 && alpha === 1) {
+  //   return "white";
+  // }
 
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
+  // if (color.r === 0 && color.g === 0 && color.b === 0 && alpha === 1) {
+  //   return "black";
+  // }
+
+  // return `rgba(${r}, ${g}, ${b}, ${a})`;
 };
 
 export const exmlGradientFromFills = (

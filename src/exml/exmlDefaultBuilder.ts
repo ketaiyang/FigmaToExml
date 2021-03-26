@@ -9,10 +9,11 @@ import {
 import {
   exmlVisibility,
   exmlRotation,
-  exmlOpacity,
+  exmlAlpha,
 } from "./builderImpl/exmlBlend";
 import { exmlPosition } from "./builderImpl/exmlPosition";
 import {
+  exmlColor,
   exmlColorFromFills,
   exmlGradientFromFills,
 } from "./builderImpl/exmlColor";
@@ -21,126 +22,182 @@ import { format } from "../common/parse";
 import { parentCoordinates } from "../common/parentCoordinates";
 import { exmlSize, exmlSizePartial } from "./builderImpl/exmlSize";
 import { exmlBorderRadius } from "./builderImpl/exmlBorderRadius";
+import { retrieveTopFill } from "../common/retrieveFill";
+import { components, common as comComps, properties } from "./builderImpl/exmlComponent";
+import { exmlProperty, getHead } from "./builderImpl/exmlCustom";
 
 export class ExmlDefaultBuilder {
   style: string;
-  isJSX: boolean;
   visible: boolean;
   name: string = "";
+  comp: {head : string, child : boolean, adaptive: boolean};
   hasFixedSize = false;
+  constraintTypeH : ConstraintType;
+  constraintTypeV : ConstraintType;
+  constraintH : boolean = false;
+  constraintV : boolean = false;
+  adaptiveW : boolean = false;
+  adaptiveH : boolean = false;
 
   constructor(node: SceneNode) {
-    this.isJSX = optIsJSX;
     this.style = "";
     this.visible = node.visible;
+    this.comp = getHead(node)
 
-    if (showLayerName) {
-      this.name = node.name.replace(" ", "");
+    if ("constraints" in node) {
+      this.constraintTypeH = node.constraints.horizontal
+      if (this.constraintTypeH === "CENTER" || this.constraintTypeH === "MAX" || this.constraintTypeH === "MIN" || this.constraintTypeH === "STRETCH") {
+        this.constraintH = true
+        if (this.constraintTypeH === "STRETCH") {
+          this.adaptiveW = true
+        }
+      }
+      this.constraintTypeV = node.constraints.vertical
+      if (this.constraintTypeV === "CENTER" || this.constraintTypeV === "MAX" || this.constraintTypeV === "MIN" || this.constraintTypeV === "STRETCH") {
+        this.constraintV = true
+        if (this.constraintTypeV === "STRETCH") {
+          this.adaptiveH = true
+        }
+      }
+    }
+
+    if (this.comp.adaptive) {
+      this.adaptiveW = true
+      this.adaptiveH = true
     }
   }
 
   blend(node: SceneNode): this {
-    this.style += exmlVisibility(node, this.isJSX);
-    this.style += exmlRotation(node);
-    this.style += exmlOpacity(node, this.isJSX);
+    this.style += exmlVisibility(node);
+    // this.style += exmlRotation(node);
+    this.style += exmlAlpha(node);
+    this.style += exmlProperty(node)
 
     return this;
   }
 
-  border(node: AltGeometryMixin & AltSceneNode): this {
-    // add border-radius: 10, for example.
-    this.style += exmlBorderRadius(node, this.isJSX);
+  // border(node: GeometryMixin & SceneNode): this {
+  //   // add border-radius: 10, for example.
+  //   this.style += exmlBorderRadius(node, this.isJSX);
 
-    console.log(
-      "borderRadius is ",
-      exmlBorderRadius(node, this.isJSX),
-      " - for ",
-      node.name,
-      "and ",
-      node.id,
-      "which is",
-      node.type,
-      "and",
-      node
-    );
+  //   console.log(
+  //     "borderRadius is ",
+  //     exmlBorderRadius(node, this.isJSX),
+  //     " - for ",
+  //     node.name,
+  //     "and ",
+  //     node.id,
+  //     "which is",
+  //     node.type,
+  //     "and",
+  //     node
+  //   );
 
-    // add border: 10px solid, for example.
-    if (node.strokes && node.strokes.length > 0 && node.strokeWeight > 0) {
-      const fill = this.retrieveFill(node.strokes);
-      const weight = node.strokeWeight;
+  //   // add border: 10px solid, for example.
+  //   if (node.strokes && node.strokes.length > 0 && node.strokeWeight > 0) {
+  //     const fill = this.retrieveFill(node.strokes);
+  //     const weight = node.strokeWeight;
 
-      if (fill.kind === "gradient") {
-        this.style += format("border", this.isJSX, `${weight}px solid`);
+  //     if (fill.kind === "gradient") {
+  //       this.style += format("border", this.isJSX, `${weight}px solid`);
 
-        // Gradient requires these.
-        this.style += format("border-image-slice", this.isJSX, 1);
-        this.style += format(
-          "border-image-source",
-          this.isJSX,
-          fill.prop
-        );
-      } else {
-        const border = `${weight}px solid ${fill.prop}`;
+  //       // Gradient requires these.
+  //       this.style += format("border-image-slice", this.isJSX, 1);
+  //       this.style += format(
+  //         "border-image-source",
+  //         this.isJSX,
+  //         fill.prop
+  //       );
+  //     } else {
+  //       const border = `${weight}px solid ${fill.prop}`;
 
-        // use "2px solid white" instead of splitting into three properties.
-        // This pattern seems more common than using border, borderColor and borderWidth.
-        this.style += format("border", this.isJSX, border);
+  //       // use "2px solid white" instead of splitting into three properties.
+  //       // This pattern seems more common than using border, borderColor and borderWidth.
+  //       this.style += format("border", this.isJSX, border);
+  //     }
+  //   }
+
+  //   return this;
+  // }
+
+  constraint(node: SceneNode): this {
+    if ("width" in node.parent && "height" in node.parent){
+      if (this.constraintH) {
+        if (this.constraintTypeH === "CENTER") {
+          this.style += format("horizontalCenter", node.x + node.width/2 - node.parent.width/2)
+        } else if (this.constraintTypeH === "MAX") {
+          this.style += format("right", node.parent.width - (node.x + node.width))
+        } else if (this.constraintTypeH === "MIN") {
+          this.style += format("left", node.x)
+        } else if (this.constraintTypeH === "STRETCH") {
+          this.style += format("left", node.x)
+          this.style += format("right", node.parent.width - (node.x + node.width))
+        }
+      }
+
+      if (this.constraintV) {
+        if (this.constraintTypeV === "CENTER") {
+          this.style += format("verticalCenter", node.y + node.height/2 - node.parent.height/2)
+        } else if (this.constraintTypeV === "MAX") {
+          this.style += format("bottom", node.parent.height - (node.y + node.height))
+        } else if (this.constraintTypeV === "MIN") {
+          this.style += format("top", node.y)
+        } else if (this.constraintTypeV === "STRETCH") {
+          this.style += format("top", node.y)
+          this.style += format("bottom", node.parent.height - (node.y + node.height))
+        }
       }
     }
 
+    return this
+  }
+
+  position(node: SceneNode): this {
+    // const position = exmlPosition(node, parentId);
+
+    // if (position === "absoluteManualLayout" && node.parent) {
+    //   // tailwind can't deal with absolute layouts.
+
+    //   const [parentX, parentY] = parentCoordinates(node.parent);
+
+    //   const left = node.x - parentX;
+    //   const top = node.y - parentY;
+
+    //   this.style += format("left", this.isJSX, left);
+    //   this.style += format("top", this.isJSX, top);
+
+    //   this.style += format("position", this.isJSX, "absolute");
+    // } else {
+    //   this.style += position;
+    // }
+
+    if (!this.constraintH){
+      this.style += format("x", node.x)
+    }
+
+    if (!this.constraintV){
+      this.style += format("y", node.y)
+    }
+
     return this;
   }
 
-  position(node: AltSceneNode, parentId: string): this {
-    const position = exmlPosition(node, parentId);
-
-    if (position === "absoluteManualLayout" && node.parent) {
-      // tailwind can't deal with absolute layouts.
-
-      const [parentX, parentY] = parentCoordinates(node.parent);
-
-      const left = node.x - parentX;
-      const top = node.y - parentY;
-
-      this.style += format("left", this.isJSX, left);
-      this.style += format("top", this.isJSX, top);
-
-      this.style += format("position", this.isJSX, "absolute");
-    } else {
-      this.style += position;
+  rotation(node: SceneNode): this {
+    if (node.rotation !== undefined && Math.round(node.rotation) !== 0) {
+      this.style += format("rotation", node.rotation);
     }
-
     return this;
   }
 
   customColor(
     paintArray: ReadonlyArray<Paint> | PluginAPI["mixed"],
-    property: "text" | "background-color"
+    property: string
   ): this {
     const fill = this.retrieveFill(paintArray);
     if (fill.kind === "solid") {
-      // When text, solid must be outputted as 'color'.
-      const prop = property === "text" ? "color" : property;
-
-      this.style += format(prop, this.isJSX, fill.prop);
+      this.style += format(property, fill.prop);
     } else if (fill.kind === "gradient") {
-      if (property === "background-color") {
-        this.style += format("background-image", this.isJSX, fill.prop);
-      } else if (property === "text") {
-        this.style += format("background", this.isJSX, fill.prop);
-
-        this.style += format(
-          "-webkit-background-clip",
-          this.isJSX,
-          "text"
-        );
-
-        this.style += format(
-          "-webkit-text-fill-color",
-          this.isJSX,
-          "transparent"
-        );
-      }
+      //白鹭没有渐变
     }
 
     return this;
@@ -164,33 +221,55 @@ export class ExmlDefaultBuilder {
     return { prop: "", kind: "none" };
   };
 
-  shadow(node: AltBlendMixin): this {
-    const shadow = exmlShadow(node);
-    if (shadow) {
-      this.style += format("box-shadow", this.isJSX, exmlShadow(node));
+  stroke(node: GeometryMixin & SceneNode): this {
+    if (node.strokes.length > 0 && node.strokeWeight > 0) {
+      this.style += format("stroke", node.strokeWeight)
+      let stroke = retrieveTopFill(node.strokes)
+      if (stroke.type === "SOLID"){
+        this.style += format("strokeColor", exmlColor(stroke.color))
+      }
     }
+
+    return this;
+  }
+
+  shadow(node: BlendMixin): this {
+    const shadow = exmlShadow(node);
+    if (shadow !== "") {
+      this.style += shadow;
+    }
+    
     return this;
   }
 
   // must be called before Position, because of the hasFixedSize attribute.
-  widthHeight(node: AltSceneNode): this {
+  widthHeight(node: SceneNode): this {
     // if current element is relative (therefore, children are absolute)
     // or current element is one of the absoltue children and has a width or height > w/h-64
-    if ("isRelative" in node && node.isRelative === true) {
-      this.style += exmlSize(node, this.isJSX);
-    } else {
-      const partial = exmlSizePartial(node, this.isJSX);
-      this.hasFixedSize = partial[0] !== "" && partial[1] !== "";
+    // if ("isRelative" in node && node.isRelative === true) {
+    //   this.style += exmlSize(node, this.isJSX);
+    // } else {
+    //   const partial = exmlSizePartial(node, this.isJSX);
+    //   this.hasFixedSize = partial[0] !== "" && partial[1] !== "";
 
-      this.style += partial.join("");
+    //   this.style += partial.join("");
+    // }
+
+    if (!this.adaptiveW) {
+      this.style += format("width", node.width)
     }
+
+    if (!this.adaptiveH) {
+      this.style += format("height", node.height)
+    }
+
     return this;
   }
 
-  autoLayoutPadding(node: AltFrameMixin | AltDefaultShapeMixin): this {
-    this.style += exmlPadding(node, this.isJSX);
-    return this;
-  }
+  // autoLayoutPadding(node: AltFrameMixin | AltDefaultShapeMixin): this {
+  //   this.style += exmlPadding(node, this.isJSX);
+  //   return this;
+  // }
 
   removeTrailingSpace(): this {
     if (this.style.length > 0 && this.style.slice(-1) === " ") {
@@ -204,17 +283,9 @@ export class ExmlDefaultBuilder {
     this.removeTrailingSpace();
 
     if (this.style) {
-      if (this.isJSX) {
-        this.style = ` style={{${this.style}}}`;
-      } else {
-        this.style = ` style="${this.style}"`;
-      }
+      this.style = `${this.style}`;
     }
-    if (this.name.length > 0) {
-      const classOrClassName = this.isJSX ? "className" : "class";
-      return ` ${classOrClassName}="${this.name}"${this.style}`;
-    } else {
-      return this.style;
-    }
+    
+    return this.style;
   }
 }
