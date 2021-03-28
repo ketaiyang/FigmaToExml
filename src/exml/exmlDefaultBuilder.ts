@@ -38,6 +38,7 @@ export class ExmlDefaultBuilder {
   constraintV : boolean = false;
   adaptiveW : boolean = false;
   adaptiveH : boolean = false;
+  inLayout : boolean = false;
 
   constructor(node: SceneNode) {
     this.style = "";
@@ -64,6 +65,26 @@ export class ExmlDefaultBuilder {
     if (this.comp.adaptive) {
       this.adaptiveW = true
       this.adaptiveH = true
+    }
+
+    if ("layoutMode" in node && node.layoutMode !== "NONE"){
+      if (node.layoutMode === "HORIZONTAL"){
+        if (node.primaryAxisSizingMode === "AUTO")
+          this.adaptiveW = true
+        if (node.counterAxisSizingMode === "AUTO")
+          this.adaptiveH = true
+      }
+
+      if (node.layoutMode === "VERTICAL"){
+        if (node.primaryAxisSizingMode === "AUTO")
+          this.adaptiveH = true
+        if (node.counterAxisSizingMode === "AUTO")
+          this.adaptiveW = true
+      }
+    }
+
+    if ("layoutMode" in node.parent && node.parent.layoutMode !== "NONE"){
+      this.inLayout = true
     }
   }
 
@@ -121,7 +142,7 @@ export class ExmlDefaultBuilder {
   // }
 
   constraint(node: SceneNode): this {
-    if ("width" in node.parent && "height" in node.parent){
+    if ("width" in node.parent && "height" in node.parent && !this.inLayout){
       if (this.constraintH) {
         if (this.constraintTypeH === "CENTER") {
           this.style += format("horizontalCenter", node.x + node.width/2 - node.parent.width/2)
@@ -171,12 +192,17 @@ export class ExmlDefaultBuilder {
     //   this.style += position;
     // }
 
-    if (!this.constraintH){
-      this.style += format("x", node.x)
-    }
+    if (!this.inLayout){
+      if (!this.constraintH){
+        this.style += format("x", node.x)
+      }
 
-    if (!this.constraintV){
-      this.style += format("y", node.y)
+      if (!this.constraintV){
+        if (node.type === "VECTOR")
+          this.style += format("y", node.y - node.height)
+        else
+          this.style += format("y", node.y)
+      }
     }
 
     return this;

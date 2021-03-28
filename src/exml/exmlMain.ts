@@ -14,6 +14,7 @@ import { indentString } from "../common/indentString";
 import { components, common as comComps, properties } from "./builderImpl/exmlComponent";
 import { retrieveTopFill } from "../common/retrieveFill";
 import { getCompType } from "./builderImpl/exmlCustom"
+import { exmlLayout } from "./builderImpl/exmlLayout"
 
 let parentId = "";
 
@@ -82,6 +83,16 @@ const exmlWidgetGenerator = (
 
     //   }
     // }
+    if ("layoutMode" in node){
+      console.log(node.layoutMode)
+      console.log(node.primaryAxisSizingMode)
+      console.log(node.counterAxisSizingMode)
+      console.log(node.primaryAxisAlignItems)
+      console.log(node.counterAxisAlignItems)
+      console.log(node.itemSpacing)
+      console.log(node.horizontalPadding)
+      console.log(node.verticalPadding)
+    }
 
     let name = node.getPluginData("name")
     let compType = getCompType(node, name)
@@ -290,7 +301,12 @@ export const exmlContainer = (
   
   if (builder.comp.head !== ""){
     if (builder.comp.child && "children" in node) {
-      return `\n<${builder.comp.head}${builder.build()}>${indentString(exmlWidgetGenerator(node.children))}\n</${builder.comp.head}>`;
+      if ("layoutMode" in node) {
+        let layout = exmlLayout(node)
+        return `\n<${builder.comp.head}${builder.build()}>${indentString(layout+exmlWidgetGenerator(node.children))}\n</${builder.comp.head}>`;
+      } else {
+        return `\n<${builder.comp.head}${builder.build()}>${indentString(exmlWidgetGenerator(node.children))}\n</${builder.comp.head}>`;
+      }
     } else {
       return `\n<${builder.comp.head}${builder.build()}/>`;
     }
