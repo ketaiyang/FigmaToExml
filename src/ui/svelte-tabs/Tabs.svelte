@@ -1,114 +1,124 @@
 <script context="module">
-  export const TABS = {};
+	export const TABS = {};
+
 </script>
 
 <script>
-  import { afterUpdate, setContext, onDestroy, onMount, tick } from "svelte";
-  import { writable } from "svelte/store";
+	import {
+		afterUpdate,
+		setContext,
+		onDestroy,
+		onMount,
+		tick
+	} from "svelte";
+	import {
+		writable
+	} from "svelte/store";
 
-  export let selectedTabIndex = 0;
+	export let selectedTabIndex = 0;
 
-  const tabElements = [];
-  const tabs = [];
-  const panels = [];
+	const tabElements = [];
+	const tabs = [];
+	const panels = [];
 
-  const controls = writable({});
-  const labeledBy = writable({});
+	const controls = writable({});
+	const labeledBy = writable({});
 
-  const selectedTab = writable(null);
-  const selectedPanel = writable(null);
+	const selectedTab = writable(null);
+	const selectedPanel = writable(null);
 
-  function removeAndUpdateSelected(arr, item, selectedStore) {
-    const index = arr.indexOf(item);
-    arr.splice(index, 1);
-    selectedStore.update(selected =>
-      selected === item ? arr[index] || arr[arr.length - 1] : selected
-    );
-  }
+	function removeAndUpdateSelected(arr, item, selectedStore) {
+		const index = arr.indexOf(item);
+		arr.splice(index, 1);
+		selectedStore.update(selected =>
+			selected === item ? arr[index] || arr[arr.length - 1] : selected
+		);
+	}
 
-  function registerItem(arr, item, selectedStore) {
-    arr.push(item);
-    selectedStore.update(selected => selected || item);
-    onDestroy(() => removeAndUpdateSelected(arr, item, selectedStore));
-  }
+	function registerItem(arr, item, selectedStore) {
+		arr.push(item);
+		selectedStore.update(selected => selected || item);
+		onDestroy(() => removeAndUpdateSelected(arr, item, selectedStore));
+	}
 
-  function selectTab(tab) {
-    selectedTabIndex = tabs.indexOf(tab);
-    selectedTab.set(tab);
-    selectedPanel.set(panels[selectedTabIndex]);
-  }
+	function selectTab(tab) {
+		selectedTabIndex = tabs.indexOf(tab);
+		selectedTab.set(tab);
+		selectedPanel.set(panels[selectedTabIndex]);
+	}
 
-  setContext(TABS, {
-    registerTab(tab) {
-      registerItem(tabs, tab, selectedTab);
-    },
+	setContext(TABS, {
+		registerTab(tab) {
+			registerItem(tabs, tab, selectedTab);
+		},
 
-    registerTabElement(tabElement) {
-      tabElements.push(tabElement);
-    },
+		registerTabElement(tabElement) {
+			tabElements.push(tabElement);
+		},
 
-    registerPanel(panel) {
-      registerItem(panels, panel, selectedPanel);
-    },
+		registerPanel(panel) {
+			registerItem(panels, panel, selectedPanel);
+		},
 
-    selectTab,
+		selectTab,
 
-    selectedTab,
-    selectedPanel,
+		selectedTab,
+		selectedPanel,
 
-    controls,
-    labeledBy
-  });
+		controls,
+		labeledBy
+	});
 
-  onMount(() => {
-    selectTab(tabs[selectedTabIndex]);
-  });
+	onMount(() => {
+		selectTab(tabs[selectedTabIndex]);
+	});
 
-  afterUpdate(() => {
-    for (let i = 0; i < tabs.length; i++) {
-      controls.update(controlsData => ({
-        ...controlsData,
-        [tabs[i].id]: panels[i].id
-      }));
-      labeledBy.update(labeledByData => ({
-        ...labeledByData,
-        [panels[i].id]: tabs[i].id
-      }));
-    }
-  });
+	afterUpdate(() => {
+		for (let i = 0; i < tabs.length; i++) {
+			controls.update(controlsData => ({
+				...controlsData,
+				[tabs[i].id]: panels[i].id
+			}));
+			labeledBy.update(labeledByData => ({
+				...labeledByData,
+				[panels[i].id]: tabs[i].id
+			}));
+		}
+	});
 
-  $: selectedTabIndex,
-    () => {
-      selectedTab.set(tabs[selectedTabIndex]);
-      selectedPanel.set(panels[selectedTabIndex]);
-    };
+	$: selectedTabIndex,
+		() => {
+			selectedTab.set(tabs[selectedTabIndex]);
+			selectedPanel.set(panels[selectedTabIndex]);
+		};
 
-  async function handleKeyDown(event) {
-    if (event.target.classList.contains("svelte-tabs__tab")) {
-      let selectedIndex = tabs.indexOf($selectedTab);
+	async function handleKeyDown(event) {
+		if (event.target.classList.contains("svelte-tabs__tab")) {
+			let selectedIndex = tabs.indexOf($selectedTab);
 
-      switch (event.key) {
-        case "ArrowRight":
-          selectedIndex += 1;
-          if (selectedIndex > tabs.length - 1) {
-            selectedIndex = 0;
-          }
-          selectTab(tabs[selectedIndex]);
-          tabElements[selectedIndex].focus();
-          break;
+			switch (event.key) {
+				case "ArrowRight":
+					selectedIndex += 1;
+					if (selectedIndex > tabs.length - 1) {
+						selectedIndex = 0;
+					}
+					selectTab(tabs[selectedIndex]);
+					tabElements[selectedIndex].focus();
+					break;
 
-        case "ArrowLeft":
-          selectedIndex -= 1;
-          if (selectedIndex < 0) {
-            selectedIndex = tabs.length - 1;
-          }
-          selectTab(tabs[selectedIndex]);
-          tabElements[selectedIndex].focus();
-      }
-    }
-  }
+				case "ArrowLeft":
+					selectedIndex -= 1;
+					if (selectedIndex < 0) {
+						selectedIndex = tabs.length - 1;
+					}
+					selectTab(tabs[selectedIndex]);
+					tabElements[selectedIndex].focus();
+			}
+		}
+	}
+
 </script>
 
 <div class="svelte-tabs" on:keydown={handleKeyDown}>
-  <slot />
+	<slot />
 </div>

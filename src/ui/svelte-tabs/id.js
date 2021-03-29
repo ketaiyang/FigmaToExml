@@ -1,5 +1,5 @@
 let id = 1;
 
 export default function getId() {
-  return `svelte-tabs-${id++}`;
+	return `svelte-tabs-${id++}`;
 }

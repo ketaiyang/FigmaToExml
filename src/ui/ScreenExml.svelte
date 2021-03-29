@@ -1,64 +1,79 @@
 <script>
-  import Prism from "svelte-prism";
-  import "prism-theme-night-owl";
+	import Prism from "svelte-prism";
+	import "prism-theme-night-owl";
 
-  let codeData = "";
-  let emptySelection = false;
+	let codeData = "";
+	let emptySelection = false;
 
-  export let showCode;
+	export let showCode;
 
-  $: codeObservable = codeData;
-  $: emptyObservable = emptySelection;
+	$: codeObservable = codeData;
+	$: emptyObservable = emptySelection;
 
-  onmessage = event => {
-    // console.log("got this from the plugin code", event.data);
-    if (!event.data.pluginMessage) {
-      return;
-    }
+	onmessage = event => {
+		// console.log("got this from the plugin code", event.data);
+		if (!event.data.pluginMessage) {
+			return;
+		}
 
-    if (emptySelection !== (event.data.pluginMessage.type === "empty")) {
-      emptySelection = event.data.pluginMessage.type === "empty";
-    }
+		if (emptySelection !== (event.data.pluginMessage.type === "empty")) {
+			emptySelection = event.data.pluginMessage.type === "empty";
+		}
 
-    if (event.data.pluginMessage.type === "result") {
-      codeData = event.data.pluginMessage.data;
-    }
-  };
+		if (event.data.pluginMessage.type === "result") {
+			codeData = event.data.pluginMessage.data;
+		}
+	};
 
-  import Switch from "./Switch.svelte";
+	import Switch from "./Switch.svelte";
 
-  import { createEventDispatcher } from "svelte";
-  const dispatch = createEventDispatcher();
-  const clipboard = data => dispatch("clipboard", { text: data });
+	import {
+		createEventDispatcher
+	} from "svelte";
+	const dispatch = createEventDispatcher();
+	const clipboard = data => dispatch("clipboard", {
+		text: data
+	});
 
-  function handleClipboard(event) {
-    clipboard(event.detail.text);
-  }
+	function handleClipboard(event) {
+		clipboard(event.detail.text);
+	}
 
-  // INIT
-  import { onMount } from "svelte";
-  onMount(() => {
-    parent.postMessage({ pluginMessage: { type: "exml" } }, "*");
-  });
+	// INIT
+	import {
+		onMount
+	} from "svelte";
+	onMount(() => {
+		parent.postMessage({
+			pluginMessage: {
+				type: "exml"
+			}
+		}, "*");
+	});
 
-  // TO EXML
-  import { writeFile } from "../io/fs"
-  const toExml = () =>{
-    writeFile("_.exml", codeData)
-  }
+	// TO EXML
+	import {
+		writeFile
+	} from "../io/fs"
+	const toExml = () => {
+		writeFile("_.exml", codeData)
+	}
 
-  // showCode
-  const handleShowCode = data => dispatch("setShowCode", { showCode: data });
-  const onChange = (target) =>{
-    handleShowCode(showCode)
-  }
+	// showCode
+	const handleShowCode = data => dispatch("setShowCode", {
+		showCode: data
+	});
+	const onChange = (target) => {
+		handleShowCode(showCode)
+	}
 
-  const sectionStyle = "border rounded-lg bg-white";
+	const sectionStyle = "border rounded-lg bg-white";
+
 </script>
 
 <div class="px-2 pt-2 bg-gray-50">
 
-  {#if emptySelection}
+	{#if emptySelection}
     <div
       class="flex flex-col space-y-2 m-auto items-center justify-center p-4 {sectionStyle}">
       <p class="text-lg font-bold">Nothing is selected</p>
