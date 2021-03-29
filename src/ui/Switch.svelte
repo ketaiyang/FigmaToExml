@@ -48,7 +48,8 @@
       type="checkbox"
       class="sr-only"
       {disabled}
-      bind:checked />
+      bind:checked
+      on:change="" />
     <div class="track" />
     <div class="thumb" />
   </div>

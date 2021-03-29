@@ -1,21 +1,7 @@
-// import { retrieveTailwindText } from "./tailwind/retrieveUI/retrieveTexts";
-// import {
-//   retrieveGenericLinearGradients,
-//   retrieveGenericSolidUIColors,
-// } from "./common/retrieveUI/retrieveColors";
-// import { htmlMain } from "./html/htmlMain";
-// import { swiftuiMain } from "./swiftui/swiftuiMain";
-// import { tailwindMain } from "./tailwind/tailwindMain";
-// import { flutterMain } from "./flutter/flutterMain";
-import { convertIntoAltNodes } from "./altNodes/altConversion";
 import { exmlMain } from "./exml/exmlMain"
 import { compParse, setProperty } from "./exml/builderImpl/exmlCustom"
 
-let parentId: string;
-let isJsx = false;
-let layerName = false;
 let currentSelection: SceneNode;
-// let material = true;
 
 let mode: "exml" | "property";
 
@@ -30,41 +16,12 @@ const run = () => {
     return;
   }
 
-  // check [ignoreStackParent] description
-  if (figma.currentPage.selection.length > 0) {
-    parentId = figma.currentPage.selection[0].parent?.id ?? "";
-  }
-
-  // let result = "";
-
-  const convertedSelection = convertIntoAltNodes(
-    figma.currentPage.selection,
-    null
-  );
-
   currentSelection = figma.currentPage.selection[0]
-  // console.log(currentSelection.parent.type)
-  // const nodes = currentSelection.findAll(node => node.visible != false)
-  // nodes = Array<SceneNode>()
-  // traverse(currentSelection)
-  // for(const node of nodes){
-  //   console.log(node.name)
-  // }
 
-  // @ts-ignore
-  // if (mode === "flutter") {
-  //   result = flutterMain(convertedSelection, parentId, material);
-  // } else if (mode === "tailwind") {
-  //   result = tailwindMain(convertedSelection, parentId, isJsx, layerName);
-  // } else if (mode === "swiftui") {
-  //   result = swiftuiMain(convertedSelection, parentId);
-  // } else if (mode === "html") {
-  //   result = htmlMain(convertedSelection, parentId, isJsx, layerName);
-  // }
   if (mode == "exml"){
     // currentSelection = retrieveTopFrame(currentSelection)
     if ((currentSelection.type == "FRAME" || currentSelection.type == "GROUP") && currentSelection.parent.type === "PAGE") {
-      let result = exmlMain(convertedSelection, parentId, isJsx, layerName, currentSelection)
+      let result = exmlMain(currentSelection)
 
       figma.ui.postMessage({
         type: "result",
@@ -87,32 +44,6 @@ const run = () => {
     //   });
     // }
   }
-
-//   console.log(result);
-
-
-//   if (
-//     mode === "tailwind" ||
-//     mode === "flutter" ||
-//     mode === "html" ||
-//     mode === "swiftui"
-//   ) {
-//     figma.ui.postMessage({
-//       type: "colors",
-//       data: retrieveGenericSolidUIColors(convertedSelection, mode),
-//     });
-
-//     figma.ui.postMessage({
-//       type: "gradients",
-//       data: retrieveGenericLinearGradients(convertedSelection, mode),
-//     });
-//   }
-//   if (mode === "tailwind") {
-//     figma.ui.postMessage({
-//       type: "text",
-//       data: retrieveTailwindText(convertedSelection),
-//     });
-//   }
 };
 
 figma.on("selectionchange", () => {
@@ -146,17 +77,17 @@ figma.ui.onmessage = (msg) => {
 };
 
 
-let nodes = Array<SceneNode>()
-function traverse(node){
-  if (node.visible != false) {
-    nodes.push(node)
-    if ("children" in node) {
-      for (const child of node.children) {
-        traverse(child)
-      }
-    }
-  }
-}
+// let nodes = Array<SceneNode>()
+// function traverse(node){
+//   if (node.visible != false) {
+//     nodes.push(node)
+//     if ("children" in node) {
+//       for (const child of node.children) {
+//         traverse(child)
+//       }
+//     }
+//   }
+// }
 
 const retrieveTopFrame = (node: SceneNode): SceneNode => {
   while (node.parent.type === "FRAME" || node.parent.type === "GROUP"){

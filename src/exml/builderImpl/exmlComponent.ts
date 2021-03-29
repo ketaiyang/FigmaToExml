@@ -69,7 +69,8 @@ export const components = {
         "property" : [
         ],
         "head" : "e:Group",
-        "child" : true
+        "child" : true,
+        "fix" : true
     },
     "Rect" : {
         "property" : [
@@ -80,7 +81,7 @@ export const components = {
         "property" : [
         ],
         "head" : "e:Scroller",
-        "child" : true
+        "child" : true,
     },
     "List" : {
         "property" : [

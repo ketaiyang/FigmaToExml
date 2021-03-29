@@ -3,7 +3,6 @@
 
   let emptySelection = false;
 
-  let arrData = new Array();
   let dict = {};
 
   // INIT
@@ -23,13 +22,6 @@
 
     if (event.data.pluginMessage.type === "result") {
       dict = event.data.pluginMessage.data
-      console.log(dict)
-      // dict = {}
-      // if (arrData && arrData.length > 0){
-      //   arrData.forEach(element => {
-      //     dict[element[0]] = element[1]
-      //   });
-      // }
     }
   };
 
@@ -44,11 +36,13 @@
   }
 </script>
 
+<div class="px-2 pt-2 bg-gray-50">
 <!-- svelte-ignore empty-block -->
 {#if emptySelection}
 
 {:else}
-<!-- <div> -->
+<div class="w-full pt-2 border rounded-lg bg-white">
+  <div class="px-2">
   <p class="text-lg font-bold">组件：</p>
   <select class="border border-gray-400 rounded" on:change="{event=>onSelect(event.target)}" on:blur="">
     {#if dict["fix"]}
@@ -89,14 +83,16 @@
       {/if}
     {/if}
   </select>
-<!-- </div> -->
   {#if dict["property"]}
     {#each dict["property"] as arr}
-      <!-- {#if arr[0] != "name"} -->
         <div class="h-2" />
         <p class="text-lg font-bold">{arr[2]}</p>
         <input class="border border-gray-400 rounded" value={arr[1]} name={arr[0]} type="{arr[3]}" on:change="{event => onInput(event.target)}">
-      <!-- {/if} -->
     {/each}
   {/if}
+  <div class="h-2" />
+  </div>
+</div>
 {/if}
+<div class="h-2" />
+</div>

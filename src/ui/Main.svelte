@@ -19,18 +19,14 @@
 		visible = false;
 	  });
 	}
+
+	let showCode = false
+	function updateShowCode(event) {
+	  showCode = event.detail.showCode
+	}
   
-	//use bind:group, with a var to create a radio group and store the value of selected item
-	//set value if this var to same value as radio item to set initial selection
-	// var switchValue;
 	import ScreenExml from "./ScreenExml.svelte";
 	import ScreenProperty from "./ScreenProperty.svelte";
-	// import ScreenFlutter from "./ScreenFlutter.svelte";
-	// import ScreenSwiftUI from "./ScreenSwiftUI.svelte";
-	// import ScreenHTML from "./ScreenHtml.svelte";
-	// import ScreenAbout from "./ScreenAbout.svelte";
-  
-	// import { GlobalCSS } from "figma-plugin-ds-svelte";
   </script>
 
 <style lang="postcss">
@@ -44,30 +40,14 @@
 	<TabList>
 	  <Tab>Exml</Tab>
 	  <Tab>Property</Tab>
-	  <!-- <Tab>Flutter</Tab>
-	  <Tab>SwiftUI</Tab>
-	  <Tab>HTML</Tab>
-	  <Tab>About</Tab> -->
 	</TabList>
   
 	<TabPanel>
-	  <ScreenExml on:clipboard={updateClipboard} />
+	  <ScreenExml on:clipboard={updateClipboard} on:setShowCode={updateShowCode} showCode={showCode} />
 	</TabPanel>
   
 	<TabPanel>
 	  <ScreenProperty/>
-	</TabPanel>
-  
-	<TabPanel>
-	  <!-- <ScreenSwiftUI on:clipboard={updateClipboard} /> -->
-	</TabPanel>
-  
-	<TabPanel>
-	  <!-- <ScreenHTML on:clipboard={updateClipboard} /> -->
-	</TabPanel>
-  
-	<TabPanel>
-	  <!-- <ScreenAbout /> -->
 	</TabPanel>
 
   </Tabs>

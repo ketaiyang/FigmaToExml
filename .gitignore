@@ -4,3 +4,4 @@ src/build/bundle.js
 dist/code.js
 dist/code.js.map
 dist/index.html
+dist/bundle.js

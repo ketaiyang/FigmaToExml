@@ -16,11 +16,13 @@ export const compParse = (
       if (compType.length > 1) {
         if (name === undefined || name === "") {
           name = compType[0]
+          setProperty(node, [["name", name]])
         }
         dict["option"] = compType
         dict["fix"] = true
       } else {
         name = compType[0]
+        setProperty(node, [["name", name]])
         if (name !== "Group") {
           dict["fix"] = true
         }

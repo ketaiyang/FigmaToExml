@@ -1,5 +1,4 @@
 import { exmlColor } from "./exmlColor";
-import { AltBlendMixin } from "../../altNodes/altMixins";
 import { format } from "../../common/parse";
 
 export const exmlShadow = (node: BlendMixin): string => {
