@@ -21,7 +21,7 @@ const production = !process.env.ROLLUP_WATCH || process.env.PRODUCTION;
 export default [{
 		input: "src/main.js",
 		output: {
-			file: "dist/bundle.js",
+			file: "src/build/bundle.js",
 			format: "iife",
 			name: "ui",
 		},

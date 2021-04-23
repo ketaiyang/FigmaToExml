@@ -35,8 +35,7 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
 
 	textCharacters(node: TextNode, property: string = ""): this {
 		if (node.characters && node.characters !== "") {
-			console.log(property)
-			this.style += format(property === "" ? "text" : property, node.characters)
+			this.style += format(property === "" ? "text" : property, node.characters.split("\n").join("\\n"))
 		}
 
 		return this
@@ -78,7 +77,9 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
 
 		if (node.textDecoration === "UNDERLINE") {
 			this.style += format("underline", "true")
-		}
+		} else if (node.textDecoration === "STRIKETHROUGH") {
+            this.style += format("linethrough", "true")
+        }
 
 		return this;
 	}
@@ -106,4 +107,12 @@ export class ExmlTextBuilder extends ExmlDefaultBuilder {
 
 		return this;
 	}
+
+    textSpacing(node: TextNode): this {
+        if (node.paragraphSpacing > 0) {
+            this.style += format("lineSpacing", node.paragraphSpacing)
+        }
+
+        return this
+    }
 }

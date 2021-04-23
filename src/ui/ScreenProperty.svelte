@@ -60,9 +60,11 @@
 </script>
 
 <div class="px-2 pt-2 bg-gray-50">
-    <!-- svelte-ignore empty-block -->
     {#if emptySelection}
-
+        <div class="flex flex-col space-y-2 m-auto items-center justify-center p-4 border rounded-lg bg-white">
+            <p class="text-lg font-bold">选择一个节点进行设置</p>
+            <!-- <p class="text-xs">selecting a top Frame</p> -->
+        </div>
     {:else}
         <div class="w-full pt-2 border rounded-lg bg-white">
             <div class="px-2">

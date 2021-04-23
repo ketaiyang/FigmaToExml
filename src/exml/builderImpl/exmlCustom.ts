@@ -32,9 +32,11 @@ export const compParse = (
 			dict["fix"] = true
 		} else {
 			name = compType[0]
-			setProperty(node, [
-				["name", name]
-			])
+            if (name !== "Skin") {
+                setProperty(node, [
+                    ["name", name]
+                ])
+            }
 			if (name !== "Group") {
 				dict["fix"] = true
 			}
@@ -243,7 +245,13 @@ export const getCompType = (node: SceneNode, name: string): string[] | undefined
 			if (fill.type === "SOLID") {
 				return ["Rect", "Image"]
 			} else if (fill.type === "IMAGE") {
-				return ["Image", "Button"]
+                let option = ["Image"]
+                Object.keys(components).forEach(key => {
+                    if (key !== "Image" && !components[key].child) {
+                        option.push(key)
+                    }
+                })
+				return option
 			}
 		} else if (node.type === "TEXT") {
 			return ["Label", "EditableText"]

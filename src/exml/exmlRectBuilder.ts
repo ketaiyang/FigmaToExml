@@ -18,8 +18,8 @@ export class ExmlRectBuilder extends ExmlDefaultBuilder {
 
 	rectAlpha(node: RectangleNode): this {
 		let fill = retrieveTopFill(node.fills)
-		if (fill) {
-			this.style += format("fillAlpha", node.opacity)
+		if (fill && fill.opacity < 1) {
+			this.style += format("fillAlpha", fill.opacity)
 		}
 
 		return this

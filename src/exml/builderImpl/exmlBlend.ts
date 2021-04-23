@@ -25,3 +25,10 @@ export const exmlRotation = (node: SceneNode): string => {
 	}
 	return "";
 };
+
+export const exmlLocked = (node: SceneNode): string => {
+	if (node.locked !== undefined && node.locked) {
+		return format("locked", "true");
+	}
+	return "";
+};

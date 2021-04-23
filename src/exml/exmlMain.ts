@@ -44,7 +44,8 @@ const exmlWidgetGenerator = (
 ): string => {
 	let comp = "";
 
-	const visibleNode = nodes.filter((d) => d /*d.visible != false && !d.name.trimStart().startsWith("ignore")*/ )
+    // .visible != false && !d.name.trimStart().startsWith("ignore")
+	const visibleNode = nodes.filter((d) => d )
 	visibleNode.forEach((node, index) => {
 
 		let name = node.getPluginData("name")
@@ -103,6 +104,7 @@ const exmlText = (
 		.fontSize(node)
 		.fontStyle(node)
 		.textAlign(node)
+        .textSpacing(node)
 		.customColor(node.fills, "textColor")
 
 	return `\n<${builder.comp.head}${builder.build()}/>`

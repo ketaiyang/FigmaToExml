@@ -5,6 +5,7 @@ import {
 	exmlVisibility,
 	exmlRotation,
 	exmlAlpha,
+    exmlLocked,
 } from "./builderImpl/exmlBlend";
 import {
 	exmlColor,
@@ -90,6 +91,7 @@ export class ExmlDefaultBuilder {
 
 	blend(node: SceneNode): this {
 		this.style += exmlVisibility(node);
+        this.style += exmlLocked(node);
 		// this.style += exmlRotation(node);
 		this.style += exmlAlpha(node);
 		this.style += exmlProperty(node)
@@ -113,15 +115,19 @@ export class ExmlDefaultBuilder {
 			}
 
 			if (this.constraintV) {
+                let y = node.y
+                // if (node.type === "VECTOR") {
+                //     y -= node.height
+                // }
 				if (this.constraintTypeV === "CENTER") {
-					this.style += format("verticalCenter", node.y + node.height / 2 - node.parent.height / 2)
+					this.style += format("verticalCenter", y + node.height / 2 - node.parent.height / 2)
 				} else if (this.constraintTypeV === "MAX") {
-					this.style += format("bottom", node.parent.height - (node.y + node.height))
+					this.style += format("bottom", node.parent.height - (y + node.height))
 				} else if (this.constraintTypeV === "MIN") {
-					this.style += format("top", node.y)
+					this.style += format("top", y)
 				} else if (this.constraintTypeV === "STRETCH") {
-					this.style += format("top", node.y)
-					this.style += format("bottom", node.parent.height - (node.y + node.height))
+					this.style += format("top", y)
+					this.style += format("bottom", node.parent.height - (y + node.height))
 				}
 			}
 		}
@@ -136,9 +142,9 @@ export class ExmlDefaultBuilder {
 			}
 
 			if (!this.constraintV) {
-				if (node.type === "VECTOR")
-					this.style += format("y", node.y - node.height)
-				else
+				// if (node.type === "VECTOR")
+				// 	this.style += format("y", node.y - node.height)
+				// else
 					this.style += format("y", node.y)
 			}
 		}
@@ -157,12 +163,14 @@ export class ExmlDefaultBuilder {
 		paintArray: ReadonlyArray < Paint > | PluginAPI["mixed"],
 		property: string
 	): this {
-		const fill = this.retrieveFill(paintArray);
-		if (fill.kind === "solid") {
-			this.style += format(property, fill.prop);
-		} else if (fill.kind === "gradient") {
-			//白鹭没有渐变
-		}
+        if (paintArray && paintArray !== figma.mixed) {
+            const fill = this.retrieveFill(paintArray);
+            if (fill.kind === "solid") {
+                this.style += format(property, fill.prop);
+            } else if (fill.kind === "gradient") {
+                //白鹭没有渐变
+            }
+        }
 
 		return this;
 	}
